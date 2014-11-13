@@ -26,9 +26,7 @@ import org.herac.tuxguitar.song.models.effects.TGEffectBend.BendPoint;
  * @author butchertkd
  */
 class Utils {
-	Utils () {
-		
-	}
+	Utils () { }
 	
 	public int tgNote2Midi(TGTrack track, TGNote note)
 	{
