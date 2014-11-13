@@ -16,6 +16,7 @@ data
 bin
 build
 nbproject
+.settings
 
 #IDE Project files
 .project
