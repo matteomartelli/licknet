@@ -1,4 +1,4 @@
-leaknet
+licknet
 =======
 
-Network of guitar leaks
+Network of guitar licks
