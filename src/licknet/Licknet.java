@@ -20,11 +20,18 @@ import org.herac.tuxguitar.song.models.TGString;
 import org.herac.tuxguitar.song.models.TGTrack;
 import org.herac.tuxguitar.song.models.effects.TGEffectBend;
 import org.herac.tuxguitar.song.models.effects.TGEffectBend.BendPoint;
+import org.graphstream.graph.*;
+import org.graphstream.graph.implementations.*;
 
 /**
  *
- * @author butchertkd
+ * @author Matteo Martelli matteomartelli3@gmail.com
  */
+
+class Note {
+	
+}
+
 class Utils {
 	Utils () { }
 	
@@ -74,6 +81,16 @@ public class Licknet {
 		
 		TGSong song = gp5.readSong();
 		
+		/* XXX: Trying the graph 
+		Graph graph = new SingleGraph("licknet");
+		graph.addNode("A");
+		graph.addNode("B");
+		graph.addNode("C");
+		graph.addEdge("AB", "A", "B");
+		graph.addEdge("BC", "B", "C");
+		graph.addEdge("CA", "C", "A");
+		graph.display(); */
+		
 		/* Assuming we are interested in the 0th track */
 		TGTrack track = song.getTrack(0);
 		System.out.println("string\tnote\tmidi\tbend");
@@ -84,8 +101,8 @@ public class Licknet {
 				TGNote note = beat.getVoice(0).getNote(0);
 				if (note.getEffect().isBend()) {
 					int bendAvgNote;
-					/* This gets the most played note in a bending.
-					 * TODO: It should be better if I split the bended note in 
+					/* Get the most played note in a bending.
+					 * TODO: It would be better if I split the bended note in 
 					 * more notes.
 					*/
 					bendAvgNote = utils.bendAvg(note.getEffect().getBend(), 
@@ -96,6 +113,8 @@ public class Licknet {
 				int midi = utils.tgNote2Midi(track, note);
 				System.out.println(note.getString() + "\t" + note.getValue()
 							       + "\t" + midi +  "\t" + note.getEffect().isBend());
+				
+				/* TODO Store the notes in a arraylist and in the graph at the same time */
 				
 			}
 		}
