@@ -30,23 +30,72 @@ import org.graphstream.graph.implementations.*;
 
 class Note {
 	
+	private int baseNote;
+	private int octave;
+	private int duration;
+	String key;
+	
+	public int tgNoteToMidi(TGTrack track, TGNote note) {
+		return track.getOffset() + (note.getValue() + 
+			   ((TGString)track.getStrings().get(note.getString() - 1)).getValue());
+	}
+	
+	Note (TGTrack track, TGNote note, TGBeat beat) {
+		int keyOffset, midi, transposed;
+		if (note == null) {
+			if (beat.isRestBeat()) {
+				this.baseNote = Consts.REST_NOTE;
+				this.octave = 0;
+				this.duration = beat.getVoice(0).getDuration().getValue();
+			} else {
+				throw new NullPointerException("Found a null note that is not a rest");
+			}
+		} else {		
+			keyOffset = 0; /*TODO: check how to get the key offset */
+			midi = tgNoteToMidi(track, note);
+			transposed = midi - keyOffset;
+			this.octave = (transposed / Consts.N_SEMITONES) - 1;
+
+			this.baseNote = transposed - (Consts.N_SEMITONES * (octave + 1));
+			
+			this.duration = note.getVoice().getDuration().getValue();
+		}
+	}
+	
+	public int getOctave() {
+		return octave;
+	}
+
+	public void setOctave(int octave) {
+		this.octave = octave;
+	}
+
+	public int getBaseNote() {
+		return baseNote;
+	}
+
+	public void setBaseNote(int baseNote) {
+		this.baseNote = baseNote;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
 }
 
 class Utils {
 	Utils () { }
-	
-	public int tgNote2Midi(TGTrack track, TGNote note)
-	{
-		return track.getOffset() + (note.getValue() + 
-			   ((TGString)track.getStrings().get(note.getString() - 1)).getValue());
-	}
 	
 	public int bendAvg(TGEffectBend bend, int baseNote) {
 		int npoints, max_idx, bendNote;
 		int[] notes = new int[24]; /* Java says they're all initialized to 0 */	
 
 		Iterator it = bend.getPoints().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			BendPoint point = (BendPoint)it.next();
 			bendNote = baseNote + (point.getValue() / 2); 
 			notes[bendNote]++;
@@ -92,32 +141,48 @@ public class Licknet {
 		graph.display(); */
 		
 		/* Assuming we are interested in the 0th track */
-		TGTrack track = song.getTrack(0);
-		System.out.println("string\tnote\tmidi\tbend");
+		TGTrack track;
+		TGMeasure measure;
+		
+		track = song.getTrack(0);
+		System.out.println("string\tnote\tbend\tbnote\tdura\toctave");
 		for (int i = 0; i < track.countMeasures(); i++) {
-			TGMeasure measure = track.getMeasure(i);
+			measure = track.getMeasure(i);
 			for (int j = 0; j < measure.countBeats(); j++) {
 				TGBeat beat = measure.getBeat(j);
+				
 				TGNote note = beat.getVoice(0).getNote(0);
-				if (note.getEffect().isBend()) {
-					int bendAvgNote;
-					/* Get the most played note in a bending.
-					 * TODO: It would be better if I split the bended note in 
-					 * more notes.
-					*/
-					bendAvgNote = utils.bendAvg(note.getEffect().getBend(), 
-								  note.getValue());
-					note.setValue(bendAvgNote);
+				
+				if (note != null) {
+					if (note.getEffect().isBend()) {
+
+						int bendAvgNote;
+						/* Get the most played note in a bending.
+						 * TODO: It would be better if I split the bended note in 
+						 * more notes.
+						*/
+						bendAvgNote = utils.bendAvg(note.getEffect().getBend(), 
+									  note.getValue());
+						note.setValue(bendAvgNote);
+					} 
+					System.out.print(note.getString() 
+								       + "\t" + note.getValue() 
+								       + "\t" + note.getEffect().isBend());
+				} else {
+					System.out.print("REST\tREST\tREST");
 				}
 				
-				int midi = utils.tgNote2Midi(track, note);
-				System.out.println(note.getString() + "\t" + note.getValue()
-							       + "\t" + midi +  "\t" + note.getEffect().isBend());
+				Note nt = new Note(track, note, beat);
+				System.out.println("\t" + nt.getBaseNote()
+							       + "\t" + nt.getDuration()
+							       + "\t" + nt.getOctave());
 				
-				/* TODO Store the notes in a arraylist and in the graph at the same time */
-				
+				/* TODO 
+				 * - merge the tied notes
+				 * - Store the notes in a arraylist and in the graph at the same time */
 			}
 		}
+		
 		
 		System.exit(0);
 	}
