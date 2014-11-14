@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package leaknet;
+package licknet;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -54,7 +54,7 @@ class Utils {
 	}
 }
 
-public class Leaknet {
+public class Licknet {
 	
 	/**
 	 * @param args the command line arguments
