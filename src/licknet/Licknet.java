@@ -1,13 +1,30 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2014 Matteo Martelli matteomartelli3@gmail.com
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package licknet;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 import org.herac.tuxguitar.io.gtp.GP5InputStream;
 import org.herac.tuxguitar.io.gtp.GTPSettings;
@@ -16,83 +33,24 @@ import org.herac.tuxguitar.song.models.TGBeat;
 import org.herac.tuxguitar.song.models.TGMeasure;
 import org.herac.tuxguitar.song.models.TGNote;
 import org.herac.tuxguitar.song.models.TGSong;
-import org.herac.tuxguitar.song.models.TGString;
 import org.herac.tuxguitar.song.models.TGTrack;
 import org.herac.tuxguitar.song.models.effects.TGEffectBend;
 import org.herac.tuxguitar.song.models.effects.TGEffectBend.BendPoint;
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
+import org.graphstream.ui.swingViewer.Viewer;
 
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
 
-class Note {
-	
-	private int baseNote;
-	private int octave;
-	private int duration;
-	String key;
-	
-	public int tgNoteToMidi(TGTrack track, TGNote note) {
-		return track.getOffset() + (note.getValue() + 
-			   ((TGString)track.getStrings().get(note.getString() - 1)).getValue());
-	}
-	
-	Note (TGTrack track, TGNote note, TGBeat beat) {
-		int keyOffset, midi, transposed;
-		if (note == null) {
-			if (beat.isRestBeat()) {
-				this.baseNote = Consts.REST_NOTE;
-				this.octave = 0;
-				this.duration = beat.getVoice(0).getDuration().getValue();
-			} else {
-				throw new NullPointerException("Found a null note that is not a rest");
-			}
-		} else {		
-			keyOffset = 0; /*TODO: check how to get the key offset */
-			midi = tgNoteToMidi(track, note);
-			transposed = midi - keyOffset;
-			this.octave = (transposed / Consts.N_SEMITONES) - 1;
-
-			this.baseNote = transposed - (Consts.N_SEMITONES * (octave + 1));
-			
-			this.duration = note.getVoice().getDuration().getValue();
-		}
-	}
-	
-	public int getOctave() {
-		return octave;
-	}
-
-	public void setOctave(int octave) {
-		this.octave = octave;
-	}
-
-	public int getBaseNote() {
-		return baseNote;
-	}
-
-	public void setBaseNote(int baseNote) {
-		this.baseNote = baseNote;
-	}
-
-	public int getDuration() {
-		return duration;
-	}
-
-	public void setDuration(int duration) {
-		this.duration = duration;
-	}
-}
-
 class Utils {
 	Utils () { }
 	
 	public int bendAvg(TGEffectBend bend, int baseNote) {
 		int npoints, max_idx, bendNote;
-		int[] notes = new int[24]; /* Java says they're all initialized to 0 */	
+		int[] notes = new int[Consts.N_GUITAR_FRETS];
 
 		Iterator it = bend.getPoints().iterator();
 		while (it.hasNext()) {
@@ -108,6 +66,19 @@ class Utils {
 		
 		return max_idx;
 	}
+	
+	public Edge checkBestEdge(Node node) {
+		/*TODo */
+		return null;
+		
+	}
+}
+
+class DegreeComparator implements Comparator<Node> {
+    @Override
+    public int compare(Node o1, Node o2) {
+		return o2.getDegree() - o1.getDegree();
+    }
 }
 
 public class Licknet {
@@ -115,12 +86,17 @@ public class Licknet {
 	/**
 	 * @param args the command line arguments
 	 */
-	public static void main(String[] args) throws FileNotFoundException, TGFileFormatException {
-		// TODO code application logic here
+	public static void main(String[] args) 
+			throws FileNotFoundException, TGFileFormatException, IOException {
+		
+		int beatCount;
+		NoteNode nt, prevNt;
+		nt = prevNt = null;
 		
 		Utils utils = new Utils();
 		TGFactory factory = new TGFactory();
 		
+		/* TODO GP5 appears not to support the key signature info */
 		FileInputStream file = new FileInputStream("data/road.gp5");
 		DataInputStream data = new DataInputStream(file);
 		
@@ -130,24 +106,19 @@ public class Licknet {
 		
 		TGSong song = gp5.readSong();
 		
-		/* XXX: Trying the graph 
+		ArrayList noteNodes = new ArrayList();
 		Graph graph = new SingleGraph("licknet");
-		graph.addNode("A");
-		graph.addNode("B");
-		graph.addNode("C");
-		graph.addEdge("AB", "A", "B");
-		graph.addEdge("BC", "B", "C");
-		graph.addEdge("CA", "C", "A");
-		graph.display(); */
 		
 		/* Assuming we are interested in the 0th track */
 		TGTrack track;
 		TGMeasure measure;
 		
 		track = song.getTrack(0);
+		beatCount = 0;
 		System.out.println("string\tnote\tbend\tbnote\tdura\toctave");
 		for (int i = 0; i < track.countMeasures(); i++) {
 			measure = track.getMeasure(i);
+			
 			for (int j = 0; j < measure.countBeats(); j++) {
 				TGBeat beat = measure.getBeat(j);
 				
@@ -172,17 +143,109 @@ public class Licknet {
 					System.out.print("REST\tREST\tREST");
 				}
 				
-				Note nt = new Note(track, note, beat);
-				System.out.println("\t" + nt.getBaseNote()
-							       + "\t" + nt.getDuration()
-							       + "\t" + nt.getOctave());
+				nt = new NoteNode(track, measure, beat, note);
+				System.out.printf("\t%d\t%.3f\t%d\t%s\n", 
+								  nt.getBaseNote(), 
+							      nt.getTime(), 
+								  nt.getOctave(),
+								  nt.getNodeKey());
 				
 				/* TODO 
-				 * - merge the tied notes
-				 * - Store the notes in a arraylist and in the graph at the same time */
+				 * - merge the tied notes */
+				
+				noteNodes.add(nt);
+				if (graph.getNode(nt.getNodeKey()) == null) {
+					Node node = graph.addNode(nt.getNodeKey());
+					node.addAttribute("note", nt);
+				}
+				
+				if (beatCount > 0) {
+					String Ak, Bk, Ek;
+					Edge edge;
+					int[] ojumps;
+					int ojumpId;
+					
+					prevNt = (NoteNode)noteNodes.get(beatCount - 1);
+					Ak = prevNt.getNodeKey();
+					Bk = nt.getNodeKey();
+					Ek = Ak+"->"+Bk;
+					ojumpId = nt.getOctave() - prevNt.getOctave() + 
+							  Consts.N_OCTAVES;
+					
+					/* Create the edge if it doesn't exist yet.
+					 * Otherwise get back the edge and modify its weights */
+					if (graph.getEdge(Ek) == null) {
+						edge = graph.addEdge(Ek, Ak, Bk, true);
+						
+						/* Create the octave jump weights array for this edge,
+						 * increment the first jump weight for this edge
+						 * and assign the array to this edge.
+						*/
+						ojumps = new int[Consts.N_OCTAVES * 2 + 1];
+						ojumps[ojumpId]++;
+						edge.addAttribute("ojumps", ojumps);
+					} else {
+						edge = graph.getEdge(Ek);
+						ojumps = edge.getAttribute("ojumps");
+						ojumps[ojumpId]++;
+						edge.changeAttribute(Ek, ojumps);
+					}
+				}
+				beatCount++;
 			}
 		}
 		
+		/* Label edges */
+		/*for (Edge edge : graph.getEachEdge()){
+			
+			int[] ojumps = edge.getAttribute("ojumps");
+			String ojumpsLabel = "[";
+			for (int i = 0; i < ojumps.length; i++){
+				ojumpsLabel += ojumps[i];
+				if (i != ojumps.length - 1)
+					ojumpsLabel += ",";
+			}
+			ojumpsLabel += "]";
+			edge.addAttribute("ui.label", ojumpsLabel);
+			
+		}*/
+		
+		ArrayList nodes = new ArrayList();
+		float goalDuration, incDuration;
+		int nStartNotes;
+		Node snode, next;
+		Edge edge;
+		goalDuration = Consts.LICK_DURATION;
+		nStartNotes = Consts.N_START_NODES;
+		
+		for (Node node : graph) {
+			node.addAttribute("ui.label", node.getId());
+			nodes.add(node);
+		}
+		Collections.sort(nodes, new DegreeComparator());
+		
+		if (nodes.size() < nStartNotes)
+			nStartNotes = nodes.size();
+		
+		/* For each node of the greatest degree set perform a visit 
+		 * starting from that node */
+		for (int i = 0; i < nStartNotes; i++) {
+			snode = (Node)nodes.get(i);
+			incDuration = 0;
+			
+			next = snode;
+			while (incDuration < goalDuration) {
+				incDuration += ((NoteNode)next.getAttribute("note")).getTime();
+				edge = utils.checkBestEdge(next);
+				
+				next = edge.getTargetNode();
+			}
+		}
+		
+		Viewer viewer = graph.display();
+		
+		
+		System.in.read();
 		
 		System.exit(0);
 	}
