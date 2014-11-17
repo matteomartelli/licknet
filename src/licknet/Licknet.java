@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 import org.herac.tuxguitar.io.gtp.GP5InputStream;
 import org.herac.tuxguitar.io.gtp.GTPSettings;
@@ -44,6 +43,31 @@ import org.graphstream.ui.swingViewer.Viewer;
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
+
+class NodeNext {
+	private final int ojumpId;
+	private final Node nodeNext;
+	private final Edge edgeThrough;
+	
+	NodeNext(int ojumpId, Node nextNode, Edge edgeThrough) {
+		this.ojumpId = ojumpId;
+		this.nodeNext = nextNode;
+		this.edgeThrough = edgeThrough;
+	}
+
+	public int getOjumpId() {
+		return ojumpId;
+	}
+
+	public Node getNextNode() {
+		return nodeNext;
+	}
+
+	public Edge getEdgeThrough() {
+		return edgeThrough;
+	}
+	
+}
 
 class Utils {
 	Utils () { }
@@ -67,17 +91,47 @@ class Utils {
 		return max_idx;
 	}
 	
-	public Edge checkBestEdge(Node node) {
-		/*TODo */
-		return null;
+	/* Find the max octave jump for an edge. 
+	 * Return the id of the maximum 
+	 */
+	public int maxOctaveJump(int[] ojumps) {
+		int max, maxIdx;
+		max = maxIdx = 0;
+		for (int i = 0; i < ojumps.length; i++) {
+				if (ojumps[i] > max) {
+					max = ojumps[i];
+					maxIdx = i;
+				}
+		}
 		
+		return maxIdx;
+	}
+	
+	public NodeNext nextNode(Node node) {
+		Edge bestEdge = node.getLeavingEdge(0);
+		int[] ojumps = null;
+		int maxWeight, idMax;
+		maxWeight = idMax = 0;
+		for (Edge edge : node.getEachLeavingEdge()) {
+			ojumps = edge.getAttribute("ojumps");
+			idMax = maxOctaveJump(ojumps);
+			if (ojumps[idMax] > maxWeight) {
+				maxWeight = ojumps[idMax];
+				bestEdge = edge;
+			}
+		}
+		
+		if (bestEdge == null || ojumps == null || ojumps[idMax] <= 0)
+			return null;
+		else 
+			return new NodeNext(idMax, bestEdge.getTargetNode(), bestEdge);
 	}
 }
 
 class DegreeComparator implements Comparator<Node> {
     @Override
     public int compare(Node o1, Node o2) {
-		return o2.getDegree() - o1.getDegree();
+		return o2.getOutDegree() - o1.getOutDegree();
     }
 }
 
@@ -195,24 +249,10 @@ public class Licknet {
 			}
 		}
 		
-		/* Label edges */
-		/*for (Edge edge : graph.getEachEdge()){
-			
-			int[] ojumps = edge.getAttribute("ojumps");
-			String ojumpsLabel = "[";
-			for (int i = 0; i < ojumps.length; i++){
-				ojumpsLabel += ojumps[i];
-				if (i != ojumps.length - 1)
-					ojumpsLabel += ",";
-			}
-			ojumpsLabel += "]";
-			edge.addAttribute("ui.label", ojumpsLabel);
-			
-		}*/
-		
-		ArrayList nodes = new ArrayList();
+		ArrayList startingNodes = new ArrayList();
 		float goalDuration, incDuration;
-		int nStartNotes;
+		int nStartNotes, prevOctave, ojumpId, ojump;
+		int[] ojumps;
 		Node snode, next;
 		Edge edge;
 		goalDuration = Consts.LICK_DURATION;
@@ -220,30 +260,50 @@ public class Licknet {
 		
 		for (Node node : graph) {
 			node.addAttribute("ui.label", node.getId());
-			nodes.add(node);
+			startingNodes.add(node);
 		}
-		Collections.sort(nodes, new DegreeComparator());
+		Collections.sort(startingNodes, new DegreeComparator());
 		
-		if (nodes.size() < nStartNotes)
-			nStartNotes = nodes.size();
+		if (startingNodes.size() < nStartNotes)
+			nStartNotes = startingNodes.size();
+		
+		ArrayList licks = new ArrayList();
+		
+		/* TODO: Backup the edges and reset them for each startNode */
 		
 		/* For each node of the greatest degree set perform a visit 
 		 * starting from that node */
 		for (int i = 0; i < nStartNotes; i++) {
-			snode = (Node)nodes.get(i);
+			snode = (Node)startingNodes.get(i);
 			incDuration = 0;
-			
-			next = snode;
-			while (incDuration < goalDuration) {
-				incDuration += ((NoteNode)next.getAttribute("note")).getTime();
-				edge = utils.checkBestEdge(next);
+			Lick lick = new Lick();
+			prevOctave = ((NoteNode)(snode.getAttribute("note"))).getOctave();
+			ojumpId = Consts.N_OCTAVES; /* The starting note has ojump of 0 */
+			while (incDuration < goalDuration && snode != null) {
 				
-				next = edge.getTargetNode();
+				NoteNode note = (NoteNode)(snode.getAttribute("note"));
+				ojump = ojumpId - Consts.N_OCTAVES;
+				prevOctave += ojump;
+				note.setOctave(prevOctave);
+				lick.getNotes().add(note);
+				
+				incDuration += note.getTime();
+				NodeNext nnext = utils.nextNode(snode);
+				if (nnext == null) {
+					snode = null;
+				} else {
+					ojumps = nnext.getEdgeThrough().getAttribute("ojumps");
+					ojumpId = nnext.getOjumpId();
+					ojumps[ojumpId]--;
+					//nnext.getEdgeThrough().changeAttribute("ojumps", ojumps);
+					snode = nnext.getNextNode();
+				}
 			}
+			lick.setDuration(incDuration);
+			licks.add(lick);
 		}
 		
 		Viewer viewer = graph.display();
-		
 		
 		System.in.read();
 		
