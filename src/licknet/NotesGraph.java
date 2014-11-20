@@ -81,7 +81,8 @@ public class NotesGraph extends SingleGraph {
 	
 	public NotesGraph(String id) {
 		super(id);
-		this.notesSequence = new ArrayList<NoteNode>();
+		this.notesSequence = new ArrayList();
+		this.licks = new ArrayList();
 	}
 	
 	/* Initialize the graph from a tab file.
@@ -187,7 +188,40 @@ public class NotesGraph extends SingleGraph {
 		}
 	}
 
-	/* If the graph is empty this silently do nothing */
+	/* TODO: implement this creating an hashmap of the notesSequence array 
+	 * where each value has key made with the noteKey and 
+	 * its pos in the notesSequence. */
+	private ArrayList<Integer> getStartIndexes(String key) {		
+		ArrayList<Integer> indexes = new ArrayList(); 
+		
+		for (int i = 0; i < this.notesSequence.size(); i++) {
+			NoteNode nt = this.notesSequence.get(i);
+			if (nt.getNodeKey().equals(key)) {
+				indexes.add(i);
+			}
+		}
+		return indexes;
+	}
+	
+	/* Return true if a lick matches in the notesSequcence array starting 
+	 * from the gives startIdx. 
+	*/
+	private boolean matchLick(Lick lick, int startIdx) {
+		boolean match = true;
+		
+		for (int i = 0, j = i + startIdx; i < lick.getNotes().size(); i++,j++) {
+			if (lick.getNotes().get(i).getNodeKey() != 
+					this.notesSequence.get(j).getNodeKey()) {
+				match = false;
+				break;
+			}
+		}
+		
+		return match;
+	}
+	
+	/* If the graph is empty this silently do nothing.
+	 * WARNING: This will erase the previous array of licks */
 	public void findLicks() {
 		licks.clear();
 		
@@ -199,7 +233,7 @@ public class NotesGraph extends SingleGraph {
 		goalDuration = Consts.LICK_DURATION;
 		nStartNotes = Consts.N_START_NODES;
 		
-		startingNodes = new ArrayList<Node>();
+		startingNodes = new ArrayList();
 		
 		if (this.nodeCount == 0)
 			return;
@@ -255,9 +289,18 @@ public class NotesGraph extends SingleGraph {
 			resetEdgesWeights();
 			lick.setDuration(incDuration);
 			
-			/* TODO check if the lick is present in the notesSequence */
+			/* TODO Check if the lick is in the notesSequence */
 			
-			licks.add(lick);
+			NoteNode fstNode = lick.getNotes().get(0);
+			ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
+			
+			for(Integer si : startIndexes) {
+				if (matchLick(lick, si))
+					lick.incrementOccurrences();
+			}
+			
+			if (lick.getOccurrences() > 0)
+				licks.add(lick);
 		}
 	}	
 

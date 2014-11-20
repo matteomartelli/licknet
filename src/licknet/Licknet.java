@@ -67,7 +67,9 @@ public class Licknet {
 		
 		graph.display();
 		
-		Utils.printNotesSequence(graph.getNotesSequence());
+		//Utils.printNotesSequence(graph.getNotesSequence());
+		
+		graph.findLicks();
 		
 		System.in.read();
 		

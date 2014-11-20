@@ -27,11 +27,11 @@ import java.util.ArrayList;
 public class Lick {
 	private float duration;
 	private int occurrences;
-	private ArrayList<NoteNode> notes;
+	private final ArrayList<NoteNode> notes;
 	
 	Lick() {
 		this.duration = 0;
-		this.notes = new ArrayList<NoteNode>();
+		this.notes = new ArrayList();
 		this.occurrences = 0;
 	}
 	
@@ -57,5 +57,9 @@ public class Lick {
 
 	public void setOccurrences(int occurrences) {
 		this.occurrences = occurrences;
+	}
+	
+	public void incrementOccurrences() {
+		this.occurrences++;
 	}
 }
