@@ -27,12 +27,12 @@ import org.graphstream.graph.Node;
 
 class Utils {
 		
-	static public void printNotesSequence(ArrayList<NoteNode> notesSequence){
+	static public void printNotesSequence(ArrayList<NoteNode> notesSequence) {
 		System.out.println("bend\tbnote\tdura\tocta\tnkey");
 		
 		for (NoteNode nt : notesSequence) {
 			if (nt.isRestNote())
-				System.out.print("REST\t");
+				System.out.print("REST");
 			else
 				System.out.print(nt.isBend());
 			
@@ -44,6 +44,20 @@ class Utils {
 		}
 		
 	}	
+
+	static public void printLicks(ArrayList<Lick> licks) {
+		for (Lick lick : licks) {
+			System.out.print("[");
+			for (int i = 0; i < lick.getNotes().size(); i++) {
+				NoteNode note = lick.getNotes().get(i);
+				System.out.print(note.getNodeKey() + note.getOctave());
+				if (i < lick.getNotes().size() - 1) {
+					System.out.println(", ");
+				}
+			}
+			System.out.println("], occures " + lick.getOccurrences() + "times");
+		}
+	}
 }
 
 public class Licknet {
@@ -55,7 +69,7 @@ public class Licknet {
 	public static void main(String[] args) 
 			throws Exception {
 		
-		String filePath = "data/road.gp5";
+		String filePath = "data/tests/test_tied.gp3";
 		
 		NotesGraph graph = new NotesGraph("licknet");
 		
@@ -68,7 +82,7 @@ public class Licknet {
 		graph.display();
 		
 		//Utils.printNotesSequence(graph.getNotesSequence());
-		
+		Utils.printLicks(graph.getLicks());
 		graph.findLicks();
 		
 		System.in.read();

@@ -28,6 +28,7 @@ import java.util.Comparator;
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
+import org.herac.tuxguitar.io.gtp.GP3InputStream;
 import org.herac.tuxguitar.io.gtp.GP5InputStream;
 import org.herac.tuxguitar.io.gtp.GTPSettings;
 import org.herac.tuxguitar.song.factory.TGFactory;
@@ -36,6 +37,8 @@ import org.herac.tuxguitar.song.models.TGMeasure;
 import org.herac.tuxguitar.song.models.TGNote;
 import org.herac.tuxguitar.song.models.TGSong;
 import org.herac.tuxguitar.song.models.TGTrack;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 /**
 *
@@ -89,7 +92,7 @@ public class NotesGraph extends SingleGraph {
 	 * This destroys the graph if it's not empty.
 	 * */
 	public void initFromFile(String filePath) 
-			throws FileNotFoundException, TGFileFormatException  {
+			throws Exception  {
 		
 		this.clear();
 		this.notesSequence.clear();
@@ -112,15 +115,16 @@ public class NotesGraph extends SingleGraph {
 	}
 	
 	public void addFromFile(String filePath) 
-			throws FileNotFoundException, TGFileFormatException {
+			throws Exception {
 		TGFactory factory = new TGFactory();
 		
-		/* TODO GP5 appears not to support the key signature info */
+		/* TODO GP5 appears not to support the key signature info.
+		 * TODO Let tuxguitar understand which filetype it is. */
 		FileInputStream file = new FileInputStream(filePath);
 		DataInputStream data = new DataInputStream(file);
 		
 		GTPSettings gtpsettings = new GTPSettings();
-		GP5InputStream gp5 = new GP5InputStream(gtpsettings);
+		GP3InputStream gp5 = new GP3InputStream(gtpsettings);
 		gp5.init(factory, data);
 		
 		TGSong song = gp5.readSong();
@@ -142,52 +146,127 @@ public class NotesGraph extends SingleGraph {
 				
 				TGNote note = beat.getVoice(0).getNote(0);
 				
-				nt = new NoteNode(track, measure, beat, note);
-				
-				/* TODO 
-				 * - merge the tied notes */
-				
-				notesSequence.add(nt);
-				if (this.getNode(nt.getNodeKey()) == null) {
-					Node node = this.addNode(nt.getNodeKey());
-					node.addAttribute("note", nt);
-				}
-				
-				if (beatCount > 0) {
-					String Ak, Bk, Ek;
-					Edge edge;
-					int[] ojumps;
-					int ojumpId;
-					
+				if (beatCount > 0)
 					prevNt = (NoteNode)notesSequence.get(beatCount - 1);
-					Ak = prevNt.getNodeKey();
-					Bk = nt.getNodeKey();
-					Ek = Ak+"->"+Bk;
-					ojumpId = nt.getOctave() - prevNt.getOctave() + 
-							  Consts.N_OCTAVES;
+				
+				/* If the node is tied, merge it to the previous one */
+				if (note != null && prevNt != null && note.isTiedNote()) {
+					String PPk, Pk, Nk, Ek;
+					Pk = prevNt.getNodeKey();
 					
-					/* Create the edge if it doesn't exist yet.
-					 * Otherwise get back the edge and modify its weights */
-					if ((edge = this.getEdge(Ek)) == null) {
-						edge = this.addEdge(Ek, Ak, Bk, true);
+					/* Copy the previous note and merge it with the new one */
+					NoteNode newNote = new NoteNode(prevNt);
+					newNote.mergeNote(note);
+					Nk = newNote.getNodeKey();
+					
+					/* Remove the previous one from the notes sequence and add 
+					 * the new one to it */
+					this.notesSequence.remove(this.notesSequence.size() - 1);
+					this.notesSequence.add(newNote);
+					
+					/* If some notes just after the first one are tied. */
+					if (beatCount < 2) {
+						/* Just remove the first one (if it has degree 0)
+						 * and add the new one. */
+						if (this.getNode(Pk).getDegree() == 0)
+							this.removeNode(Pk);
 						
-						/* Create the octave jump weights array for this edge,
-						 * increment the first jump weight for this edge
-						 * and assign the array to this edge.
-						*/
-						ojumps = new int[Consts.N_OCTAVES * 2 + 1];
-						ojumps[ojumpId]++;
-						edge.addAttribute("ojumps", ojumps);
+						this.addNode(Nk, newNote);
 					} else {
-						ojumps = edge.getAttribute("ojumps");
-						ojumps[ojumpId]++;
+						NoteNode pprevNt = (NoteNode)notesSequence.get(beatCount - 2);
+						PPk = pprevNt.getNodeKey();
+						Ek = generateEdgeKey(PPk, Pk);
+						
+						/* Find the octave weight between the pprev and prev */
+						int prevOjumpId = prevNt.getOctave() - pprevNt.getOctave() + 
+						  Consts.N_OCTAVES;
+						
+						/* Remove the previously added octave weight from the 
+						 * pprev -> prev edge. If the edge becomes with no weight
+						 * remove it. */
+						Edge edge = this.getEdge(Ek);
+						
+						int[] ojumps = edge.getAttribute("ojumps");
+						if (ojumps[prevOjumpId] > 0) {
+							ojumps[prevOjumpId]--;
+							int sum = 0;
+							for (int k = 0; k < ojumps.length; k++)
+								sum += ojumps[k];
+							if (sum == 0) {
+								this.removeEdge(edge);
+								if (this.getNode(Pk).getDegree() == 0)
+									this.removeNode(Pk);
+							}
+						} else {
+							throw new Exception("Unexpected condition case");
+						}
+						
+						/* Create a new node if it does not exist */
+						if (this.getNode(Nk) == null)
+							this.addNode(Nk, newNote);		
+							
+						/* Create a new pprev -> new edge if it doesn't exists. 
+						 * Also add the weight just removed from the other edge.
+						 */
+						Ek = generateEdgeKey(PPk, Nk);
+						if ((edge = this.getEdge(Ek)) == null) {
+							edge = this.addEdge(Ek, PPk, Nk, true);
+							ojumps = new int[Consts.N_OCTAVES * 2 + 1];
+							edge.addAttribute("ojumps", ojumps);
+						} else {
+							ojumps = edge.getAttribute("ojumps");
+						}
+						
+						ojumps[prevOjumpId]++;
+					}	
+				} else {
+					nt = new NoteNode(track, measure, beat, note);
+
+					notesSequence.add(nt);
+					if (this.getNode(nt.getNodeKey()) == null)
+						this.addNode(nt.getNodeKey(), nt);
+					
+					/* Add the note to the graph and the edge between this note
+					 * and the previous note. */
+					if (prevNt != null && beatCount > 0) {
+						String Ak, Bk, Ek;
+						Edge edge;
+						int[] ojumps;
+						int ojumpId;
+						
+						Ak = prevNt.getNodeKey();
+						Bk = nt.getNodeKey();
+						Ek = generateEdgeKey(Ak, Bk);
+						ojumpId = nt.getOctave() - prevNt.getOctave() + 
+								  Consts.N_OCTAVES;
+						
+						/* Create the edge if it doesn't exist yet.
+						 * Otherwise get back the edge and modify its weights */
+						if ((edge = this.getEdge(Ek)) == null) {
+							edge = this.addEdge(Ek, Ak, Bk, true);
+							
+							/* Create the octave jump weights array for this edge,
+							 * increment the first jump weight for this edge
+							 * and assign the array to this edge.
+							*/
+							ojumps = new int[Consts.N_OCTAVES * 2 + 1];
+							ojumps[ojumpId]++;
+							edge.addAttribute("ojumps", ojumps);
+						} else {
+							ojumps = edge.getAttribute("ojumps");
+							ojumps[ojumpId]++;
+						}
 					}
+					beatCount++;
 				}
-				beatCount++;
 			}
 		}
 	}
 
+	private String generateEdgeKey(String Ak, String Bk) {
+		return Ak + "->" + Bk;
+	}
+	
 	/* TODO: implement this creating an hashmap of the notesSequence array 
 	 * where each value has key made with the noteKey and 
 	 * its pos in the notesSequence. */
@@ -216,9 +295,17 @@ public class NotesGraph extends SingleGraph {
 				break;
 			}
 		}
-		
 		return match;
 	}
+	
+	/* Overridden method used to add a NoteNode to a Node during its creation */
+	public Node addNode(String key, NoteNode note) {
+		Node node = this.addNode(key);
+		node.addAttribute("note", note);
+		return node;
+	}
+	
+	/* TODO: addEdge(..., int[] ojumps)*/
 	
 	/* If the graph is empty this silently do nothing.
 	 * WARNING: This will erase the previous array of licks */
@@ -258,9 +345,10 @@ public class NotesGraph extends SingleGraph {
 			e.addAttribute("ojumpsBak", ojumpsBak);
 		}
 				
+		snode = (Node)startingNodes.get(0);
 		/* For each node of the greatest degree set perform a visit 
 		 * starting from that node */
-		for (int i = 0; i < nStartNotes; i++) {
+		for (int i = 0; i < nStartNotes && snode != null; i++) {
 			snode = (Node)startingNodes.get(i);
 			incDuration = 0;
 			Lick lick = new Lick();
@@ -268,7 +356,7 @@ public class NotesGraph extends SingleGraph {
 			ojumpId = Consts.N_OCTAVES; /* The starting note has ojump of 0 */
 			while (incDuration < goalDuration && snode != null) {
 				
-				NoteNode note = (NoteNode)(snode.getAttribute("note"));
+				NoteNode note = new NoteNode((NoteNode)(snode.getAttribute("note")));
 				ojump = ojumpId - Consts.N_OCTAVES;
 				prevOctave += ojump;
 				note.setOctave(prevOctave);
@@ -289,8 +377,7 @@ public class NotesGraph extends SingleGraph {
 			resetEdgesWeights();
 			lick.setDuration(incDuration);
 			
-			/* TODO Check if the lick is in the notesSequence */
-			
+			/* Check if the lick is in the notesSequence */
 			NoteNode fstNode = lick.getNotes().get(0);
 			ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
 			
@@ -315,7 +402,6 @@ public class NotesGraph extends SingleGraph {
 			
 	}
 
-
 	/* Find the max octave jump for an edge. 
 	 * Return the id of the maximum 
 	 */
@@ -339,7 +425,10 @@ public class NotesGraph extends SingleGraph {
 		
 		ojumps = maxOjumps = null;
 		maxW = maxWId = edgeMaxWId = 0;
-		bestEdge = node.getLeavingEdge(0);
+		if (node.getOutDegree() > 0)
+			bestEdge = node.getLeavingEdge(0);
+		else 
+			return null;
 		
 		for (Edge edge : node.getEachLeavingEdge()) {
 			ojumps = edge.getAttribute("ojumps");

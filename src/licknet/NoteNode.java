@@ -37,6 +37,7 @@ public class NoteNode {
 	private int baseNote;
 	private int octave;
 	private float time;
+	private int bendDistance;
 	boolean isBend, isRestNote;
 	private String nodeKey;
 
@@ -48,7 +49,8 @@ public class NoteNode {
 	NoteNode (TGTrack track, TGMeasure measure, TGBeat beat, TGNote note) {
 		int midi, transposed;
 		TGDuration tgDuration;
-		isBend = isRestNote = false;
+		this.isBend = this.isRestNote = false;
+		this.setBendDistance(0);
 		
 		if (note == null) {
 			if (beat.isRestBeat()) {
@@ -69,7 +71,8 @@ public class NoteNode {
 				*/
 				bendAvgNote = getBendAvg(note.getEffect().getBend(), 
 									     note.getValue());
-				note.setValue(bendAvgNote);
+				
+				this.bendDistance = bendAvgNote - note.getValue();
 			}
 			
 			midi = tgNoteToMidi(track, note);
@@ -81,18 +84,42 @@ public class NoteNode {
 		}
 		
 		tgDuration = beat.getVoice(0).getDuration();
-		this.time = 1.0f / (float)tgDuration.getValue();
+		this.time = calculateTime(tgDuration);
+		
+		generateNodeKey();
+	}
+	
+	/* Copy constructor */
+	NoteNode(NoteNode note) {
+		this.baseNote = note.getBaseNote();
+		this.octave = note.getOctave();
+		this.time = note.getTime();
+		this.isBend = note.isBend();
+		this.isRestNote = note.isRestNote();
+		this.nodeKey = note.getNodeKey();
+		this.bendDistance = note.getBendDistance();
+	}
+	
+	private float calculateTime(TGDuration tgDuration) {
+		float time;
+		
+		time = 1.0f / (float)tgDuration.getValue();
 		
 		if (tgDuration.isDotted())
-			this.time += this.time / 2.0f;
+			time += time / 2.0f;
 		else if (tgDuration.isDoubleDotted())
-			this.time += this.time / 4.0f;
+			time += time / 4.0f;
 		
 		if (tgDuration.getDivision().getTimes() > 0)
-			this.time *= (float)tgDuration.getDivision().getTimes()
+			time *= (float)tgDuration.getDivision().getTimes()
 						 / (float)tgDuration.getDivision().getEnters();
 		
-		nodeKey = String.format("%02d:%.3f", this.baseNote, this.time);
+		return time;
+	}
+	
+	private void generateNodeKey() {
+		this.nodeKey = String.format("%02d:%.3f:b%d", this.baseNote, 
+									 this.time, this.bendDistance);
 	}
 	
 	/* Calculate the note fret that is most played in a bended note */
@@ -154,5 +181,17 @@ public class NoteNode {
 	public boolean isBend() {
 		return this.isBend;
 	}
-}
 
+	public void mergeNote(TGNote note) {
+		this.time += calculateTime(note.getVoice().getDuration());
+		generateNodeKey();
+	}
+
+	public int getBendDistance() {
+		return bendDistance;
+	}
+
+	public void setBendDistance(int bendDistance) {
+		this.bendDistance = bendDistance;
+	}
+}
