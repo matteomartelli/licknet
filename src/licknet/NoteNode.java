@@ -73,14 +73,18 @@ public class NoteNode {
 									     note.getValue());
 				
 				this.bendDistance = bendAvgNote - note.getValue();
+				if (!Configuration.BENDINGS_INFLUENCE)
+					note.setValue(bendAvgNote);
 			}
 			
 			midi = tgNoteToMidi(track, note);
-			transposed = midi - measure.getKeySignature();
+			transposed = midi - Consts.KSINGS_MAP[measure.getKeySignature()];
 			
 			this.octave = (transposed / Consts.N_SEMITONES) - 1;
 
-			this.baseNote = transposed - (Consts.N_SEMITONES * (octave + 1));	
+			this.baseNote = transposed - (Consts.N_SEMITONES * (octave + 1));
+			
+			
 		}
 		
 		tgDuration = beat.getVoice(0).getDuration();
@@ -118,8 +122,11 @@ public class NoteNode {
 	}
 	
 	private void generateNodeKey() {
-		this.nodeKey = String.format("%02d:%.3f:b%d", this.baseNote, 
+		if (Configuration.BENDINGS_INFLUENCE)
+			this.nodeKey = String.format("%02d:%.3f:b%d", this.baseNote, 
 									 this.time, this.bendDistance);
+		else 
+			this.nodeKey = String.format("%02d:%.3f", this.baseNote, this.time);
 	}
 	
 	/* Calculate the note fret that is most played in a bended note */

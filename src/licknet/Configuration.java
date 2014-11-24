@@ -17,49 +17,18 @@
  */
 package licknet;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
+public class Configuration {
 
-public class Lick {
-	private float duration;
-	private int occurrences;
-	private final ArrayList<NoteNode> notes;
+	/* DEFAULTS */
+	public static int N_START_NODES = 15;
+	public static float LICK_DURATION = 1.0f;
+	public static int LICKS_MIN_NOTES = 1;
+	public static int LICKS_MAX_NOTES = 40;
 	
-	Lick() {
-		this.duration = 0;
-		this.notes = new ArrayList<NoteNode>();
-		this.occurrences = 0;
-	}
-	
-	public float getDuration() {
-		return duration;
-	}
-
-	public void setDuration(float duration) {
-		this.duration = duration;
-	}
-
-	public void addNote(NoteNode note) {
-		this.notes.add(note);
-	}
-	
-	public ArrayList<NoteNode> getNotes() {
-		return notes;
-	}
-
-	public int getOccurrences() {
-		return occurrences;
-	}
-
-	public void setOccurrences(int occurrences) {
-		this.occurrences = occurrences;
-	}
-	
-	public void incrementOccurrences() {
-		this.occurrences++;
-	}
+	public static boolean BENDINGS_INFLUENCE = false;
+	public static boolean LOOPNOTE_INFLUENCE = false;
 }

@@ -55,7 +55,8 @@ class Utils {
 					System.out.print(", ");
 				}
 			}
-			System.out.println("], occures " + lick.getOccurrences() + "times");
+			System.out.print("], occures " + lick.getOccurrences() + " times");
+			System.out.println(", duration: " + lick.getDuration());
 		}
 	}
 }
@@ -69,11 +70,13 @@ public class Licknet {
 	public static void main(String[] args) 
 			throws Exception {
 		
-		String filePath = "data/hendrix/Jimi Hendrix - All Along The Watchower.tg";
-		
 		NotesGraph graph = new NotesGraph("licknet");
+
+		/*String filePath = "data/hendrix/Jimi Hendrix - Foxy Lady.tg";
 		
-		graph.initFromFile(filePath);
+		graph.initFromFile(filePath);*/
+		
+		graph.initFromFolder("data/hendrix");
 		
 		for (Node node : graph.getEachNode()) {
 			node.addAttribute("ui.label", node.getId());
