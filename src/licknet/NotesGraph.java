@@ -39,6 +39,7 @@ import org.herac.tuxguitar.song.models.TGSong;
 import org.herac.tuxguitar.song.models.TGTrack;
 
 import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import org.herac.tuxguitar.io.tg.TGInputStream;
 
 /**
 *
@@ -79,13 +80,13 @@ class DegreeComparator implements Comparator<Node> {
 }
 
 public class NotesGraph extends SingleGraph {
-	private ArrayList<NoteNode> notesSequence;
-	private ArrayList<Lick> licks;
+	private final ArrayList<NoteNode> notesSequence;
+	private final ArrayList<Lick> licks;
 	
 	public NotesGraph(String id) {
 		super(id);
-		this.notesSequence = new ArrayList();
-		this.licks = new ArrayList();
+		this.notesSequence = new ArrayList<NoteNode>();
+		this.licks = new ArrayList<Lick>();
 	}
 	
 	/* Initialize the graph from a tab file.
@@ -123,11 +124,16 @@ public class NotesGraph extends SingleGraph {
 		FileInputStream file = new FileInputStream(filePath);
 		DataInputStream data = new DataInputStream(file);
 		
-		GTPSettings gtpsettings = new GTPSettings();
+		/*GTPSettings gtpsettings = new GTPSettings();
 		GP3InputStream gp5 = new GP3InputStream(gtpsettings);
 		gp5.init(factory, data);
 		
-		TGSong song = gp5.readSong();
+		TGSong song = gp5.readSong();*/
+		
+		TGInputStream tg = new TGInputStream();
+		tg.init(factory, data);
+		
+		TGSong song = tg.readSong();
 		
 		/* Assuming we are interested in the 0th track TODO: what about this? */
 		TGTrack track = song.getTrack(0);
@@ -354,7 +360,9 @@ public class NotesGraph extends SingleGraph {
 			Lick lick = new Lick();
 			prevOctave = ((NoteNode)(snode.getAttribute("note"))).getOctave();
 			ojumpId = Consts.N_OCTAVES; /* The starting note has ojump of 0 */
-			while (incDuration < goalDuration && snode != null) {
+			while (incDuration < goalDuration && 
+					lick.getNotes().size() < Consts.LICKS_MAX_NOTES 
+					&& snode != null) {
 				
 				NoteNode note = new NoteNode((NoteNode)(snode.getAttribute("note")));
 				ojump = ojumpId - Consts.N_OCTAVES;
@@ -386,7 +394,8 @@ public class NotesGraph extends SingleGraph {
 					lick.incrementOccurrences();
 			}
 			
-			if (lick.getOccurrences() > 0)
+			if (lick.getOccurrences() > 0 && 
+					lick.getNotes().size() >= Consts.LICKS_MIN_NOTES)
 				licks.add(lick);
 		}
 	}	

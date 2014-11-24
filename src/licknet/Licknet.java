@@ -50,9 +50,9 @@ class Utils {
 			System.out.print("[");
 			for (int i = 0; i < lick.getNotes().size(); i++) {
 				NoteNode note = lick.getNotes().get(i);
-				System.out.print(note.getNodeKey() + note.getOctave());
+				System.out.print(note.getNodeKey() + ":oc"+ note.getOctave());
 				if (i < lick.getNotes().size() - 1) {
-					System.out.println(", ");
+					System.out.print(", ");
 				}
 			}
 			System.out.println("], occures " + lick.getOccurrences() + "times");
@@ -69,7 +69,7 @@ public class Licknet {
 	public static void main(String[] args) 
 			throws Exception {
 		
-		String filePath = "data/tests/test_tied.gp3";
+		String filePath = "data/hendrix/Jimi Hendrix - All Along The Watchower.tg";
 		
 		NotesGraph graph = new NotesGraph("licknet");
 		
@@ -79,12 +79,14 @@ public class Licknet {
 			node.addAttribute("ui.label", node.getId());
 		}
 		
-		graph.display();
 		
-		//Utils.printNotesSequence(graph.getNotesSequence());
-		Utils.printLicks(graph.getLicks());
+		Utils.printNotesSequence(graph.getNotesSequence());
 		graph.findLicks();
 		
+		Utils.printLicks(graph.getLicks());
+
+		graph.display();
+
 		System.in.read();
 		
 		System.exit(0);

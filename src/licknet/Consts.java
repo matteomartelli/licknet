@@ -29,6 +29,8 @@ public class Consts {
 	public static final int N_GUITAR_FRETS = 24;
 	
 	/* DEFAULTS */
-	public static final int N_START_NODES = 15;
+	public static final int N_START_NODES = 20;
 	public static final float LICK_DURATION = 1.0f;
+	public static final int LICKS_MIN_NOTES = 2;
+	public static final int LICKS_MAX_NOTES = 15;
 }
