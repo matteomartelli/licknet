@@ -15,20 +15,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package licknet;
+package licknet.graph;
+
+import java.util.Comparator;
+import org.graphstream.graph.Node;
 
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
-public class Consts {
-	/* MIDI CONSTS */
-	public static final int N_OCTAVES = 6; /* GUITAR OCATVES */
-	public static final int N_SEMITONES = 12;
-	public static final int REST_NOTE = 13;
-	public static final int N_GUITAR_FRETS = 24;										
-	public static final int[] KSINGS_MAP = 
-		{0, 7, 2, 9, 4, 11, 6, 1, 5, 10, 3, 8, 1, 6, 11};
-	/*   C  G  D  A  E  B   F# C# F  Bb  Eb Ab Db Gb Cb  */
-	
+public class DegreeComparator implements Comparator<Node> {
+    @Override
+    public int compare(Node o1, Node o2) {
+		return o2.getOutDegree() - o1.getOutDegree();
+    }
 }

@@ -16,7 +16,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package licknet;
-import java.util.ArrayList;
+
+import licknet.graph.NotesGraph;
+import licknet.view.Frame;
+import javax.swing.UIManager;
+import licknet.utils.Log;
 
 import org.graphstream.graph.Node;
 
@@ -24,42 +28,6 @@ import org.graphstream.graph.Node;
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
-
-class Utils {
-		
-	static public void printNotesSequence(ArrayList<NoteNode> notesSequence) {
-		System.out.println("bend\tbnote\tdura\tocta\tnkey");
-		
-		for (NoteNode nt : notesSequence) {
-			if (nt.isRestNote())
-				System.out.print("REST");
-			else
-				System.out.print(nt.isBend());
-			
-			System.out.printf("\t%d\t%.3f\t%d\t%s\n", 
-							  nt.getBaseNote(), 
-							  nt.getTime(), 
-							  nt.getOctave(),
-							  nt.getNodeKey());
-		}
-		
-	}	
-
-	static public void printLicks(ArrayList<Lick> licks) {
-		for (Lick lick : licks) {
-			System.out.print("[");
-			for (int i = 0; i < lick.getNotes().size(); i++) {
-				NoteNode note = lick.getNotes().get(i);
-				System.out.print(note.getNodeKey() + ":oc"+ note.getOctave());
-				if (i < lick.getNotes().size() - 1) {
-					System.out.print(", ");
-				}
-			}
-			System.out.print("], occures " + lick.getOccurrences() + " times");
-			System.out.println(", duration: " + lick.getDuration());
-		}
-	}
-}
 
 public class Licknet {
 	
@@ -83,16 +51,18 @@ public class Licknet {
 		}
 		
 		
-		Utils.printNotesSequence(graph.getNotesSequence());
+		Log.printNotesSequence(graph.getNotesSequence());
+		
 		graph.findLicks();
 		
-		Utils.printLicks(graph.getLicks());
+		Log.printLicks(graph.getLicks());
 
 		graph.display();
-
-		System.in.read();
 		
-		System.exit(0);
+		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		
+
+		Frame jframe = new Frame();
 	}
 	
 }

@@ -15,51 +15,36 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package licknet;
+package licknet.graph;
 
-import java.util.ArrayList;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
 
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
-
-public class Lick {
-	private float duration;
-	private int occurrences;
-	private final ArrayList<NoteNode> notes;
+public class NodeNext {
+	private final int ojumpId;
+	private final Node nodeNext;
+	private final Edge edgeThrough;
 	
-	Lick() {
-		this.duration = 0;
-		this.notes = new ArrayList<NoteNode>();
-		this.occurrences = 0;
-	}
-	
-	public float getDuration() {
-		return duration;
+	NodeNext(int ojumpId, Node nextNode, Edge edgeThrough) {
+		this.ojumpId = ojumpId;
+		this.nodeNext = nextNode;
+		this.edgeThrough = edgeThrough;
 	}
 
-	public void setDuration(float duration) {
-		this.duration = duration;
+	public int getOjumpId() {
+		return ojumpId;
 	}
 
-	public void addNote(NoteNode note) {
-		this.notes.add(note);
-	}
-	
-	public ArrayList<NoteNode> getNotes() {
-		return notes;
+	public Node getNextNode() {
+		return nodeNext;
 	}
 
-	public int getOccurrences() {
-		return occurrences;
-	}
-
-	public void setOccurrences(int occurrences) {
-		this.occurrences = occurrences;
+	public Edge getEdgeThrough() {
+		return edgeThrough;
 	}
 	
-	public void incrementOccurrences() {
-		this.occurrences++;
-	}
 }

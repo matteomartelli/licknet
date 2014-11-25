@@ -15,8 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package licknet;
+package licknet.graph;
 
+import licknet.graph.NoteNode;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import licknet.Configuration;
+import licknet.utils.Consts;
+import licknet.lick.Lick;
 
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
@@ -44,41 +48,8 @@ import org.herac.tuxguitar.io.tg.TGInputStream;
 *
 * @author Matteo Martelli matteomartelli3@gmail.com
 */
-
-
-class NodeNext {
-	private final int ojumpId;
-	private final Node nodeNext;
-	private final Edge edgeThrough;
-	
-	NodeNext(int ojumpId, Node nextNode, Edge edgeThrough) {
-		this.ojumpId = ojumpId;
-		this.nodeNext = nextNode;
-		this.edgeThrough = edgeThrough;
-	}
-
-	public int getOjumpId() {
-		return ojumpId;
-	}
-
-	public Node getNextNode() {
-		return nodeNext;
-	}
-
-	public Edge getEdgeThrough() {
-		return edgeThrough;
-	}
-	
-}
-
-class DegreeComparator implements Comparator<Node> {
-    @Override
-    public int compare(Node o1, Node o2) {
-		return o2.getOutDegree() - o1.getOutDegree();
-    }
-}
-
 public class NotesGraph extends SingleGraph {
+	
 	private final ArrayList<NoteNode> notesSequence;
 	private final ArrayList<Lick> licks;
 	
@@ -487,10 +458,10 @@ public class NotesGraph extends SingleGraph {
 	/* TODO: return a list of leaving edges decreasing sorted by their max ojump */
 	public NodeNext nextNode(Node node) {
 		Edge bestEdge;
-		int[] ojumps, maxOjumps;
+		int[] maxOjumps;
 		int maxW, maxWId, edgeMaxWId;
 		
-		ojumps = maxOjumps = null;
+		maxOjumps = null;
 		maxW = maxWId = edgeMaxWId = 0;
 		if (node.getOutDegree() > 0)
 			bestEdge = node.getLeavingEdge(0);
@@ -498,7 +469,7 @@ public class NotesGraph extends SingleGraph {
 			return null;
 		
 		for (Edge edge : node.getEachLeavingEdge()) {
-			ojumps = edge.getAttribute("ojumps");
+			int[] ojumps = edge.getAttribute("ojumps");
 			edgeMaxWId = maxOctaveJump(ojumps);
 			if (ojumps[edgeMaxWId] > maxW) {
 				maxOjumps = ojumps;
@@ -508,7 +479,7 @@ public class NotesGraph extends SingleGraph {
 			}
 		}
 		
-		if (bestEdge == null || maxOjumps[maxWId] <= 0)
+		if (maxOjumps == null || bestEdge == null || maxOjumps[maxWId] <= 0)
 			return null;
 		else 
 			return new NodeNext(maxWId, bestEdge.getTargetNode(), bestEdge);
