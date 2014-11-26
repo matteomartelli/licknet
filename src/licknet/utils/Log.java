@@ -18,6 +18,10 @@
 package licknet.utils;
 
 import java.util.ArrayList;
+
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
+
 import licknet.graph.NoteNode;
 import licknet.lick.Lick;
 
@@ -57,6 +61,27 @@ public class Log {
 			}
 			System.out.print("], occures " + lick.getOccurrences() + " times");
 			System.out.println(", duration: " + lick.getDuration());
+		}
+	}
+	
+	static public void printNodes(ArrayList<Node> nodes) {
+		System.out.println("Nodes:");
+		for (Node n : nodes) {
+			System.out.println("odegree " + n.getOutDegree());
+		}
+	}
+	
+	static public void printEdges(ArrayList<Edge> edges) {
+		System.out.println("Edges:");
+		for (Edge e : edges) {
+			int[] ojumps = e.getAttribute("ojumps");
+			System.out.print("weights [");
+			for (int i = 0; i < ojumps.length; i++) {
+				System.out.print(ojumps[i]);
+				if (i < ojumps.length - 1)
+					System.out.print(", ");
+			}
+			System.out.println("]");
 		}
 	}
 }

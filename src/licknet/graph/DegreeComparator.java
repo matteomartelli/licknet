@@ -24,6 +24,8 @@ import org.graphstream.graph.Node;
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
+/* Compare the out degree of the nodes in an ArrayList 
+ * for descending order sorting */
 public class DegreeComparator implements Comparator<Node> {
     @Override
     public int compare(Node o1, Node o2) {

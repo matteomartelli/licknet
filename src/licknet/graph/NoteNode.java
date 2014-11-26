@@ -18,7 +18,6 @@
 package licknet.graph;
 
 import java.util.Iterator;
-import licknet.Configuration;
 import licknet.utils.Consts;
 
 import org.herac.tuxguitar.song.models.TGBeat;
@@ -40,7 +39,7 @@ public class NoteNode {
 	private int octave;
 	private float time;
 	private int bendDistance;
-	boolean isBend, isRestNote;
+	boolean isBend, isRestNote, influenceBendings;
 	private String nodeKey;
 
 	public int tgNoteToMidi(TGTrack track, TGNote note) {
@@ -48,10 +47,12 @@ public class NoteNode {
 			   ((TGString)track.getStrings().get(note.getString() - 1)).getValue());
 	}
 	
-	NoteNode (TGTrack track, TGMeasure measure, TGBeat beat, TGNote note) {
+	NoteNode (TGTrack track, TGMeasure measure, TGBeat beat, TGNote note, 
+			  boolean influenceBendings) {
 		int midi, transposed;
 		TGDuration tgDuration;
 		this.isBend = this.isRestNote = false;
+		this.influenceBendings = influenceBendings;
 		this.setBendDistance(0);
 		
 		if (note == null) {
@@ -75,7 +76,7 @@ public class NoteNode {
 									     note.getValue());
 				
 				this.bendDistance = bendAvgNote - note.getValue();
-				if (!Configuration.BENDINGS_INFLUENCE)
+				if (!influenceBendings)
 					note.setValue(bendAvgNote);
 			}
 			
@@ -104,6 +105,7 @@ public class NoteNode {
 		this.isRestNote = note.isRestNote();
 		this.nodeKey = note.getNodeKey();
 		this.bendDistance = note.getBendDistance();
+		this.influenceBendings = note.isInfluenceBendings();
 	}
 	
 	private float calculateTime(TGDuration tgDuration) {
@@ -124,7 +126,7 @@ public class NoteNode {
 	}
 	
 	private void generateNodeKey() {
-		if (Configuration.BENDINGS_INFLUENCE)
+		if (influenceBendings)
 			this.nodeKey = String.format("%02d:%.3f:b%d", this.baseNote, 
 									 this.time, this.bendDistance);
 		else 
@@ -202,5 +204,9 @@ public class NoteNode {
 
 	public void setBendDistance(int bendDistance) {
 		this.bendDistance = bendDistance;
+	}
+	
+	public boolean isInfluenceBendings() {
+		return influenceBendings;
 	}
 }

@@ -17,34 +17,42 @@
  */
 package licknet.graph;
 
+import java.util.Comparator;
+
 import org.graphstream.graph.Edge;
-import org.graphstream.graph.Node;
 
 /**
- *
- * @author Matteo Martelli matteomartelli3@gmail.com
- */
-public class NodeNext {
-	private final int ojumpId;
-	private final Node nodeNext;
-	private final Edge edgeThrough;
-	
-	NodeNext(int ojumpId, Node nextNode, Edge edgeThrough) {
-		this.ojumpId = ojumpId;
-		this.nodeNext = nextNode;
-		this.edgeThrough = edgeThrough;
-	}
-
-	public int getOjumpId() {
-		return ojumpId;
-	}
-
-	public Node getNextNode() {
-		return nodeNext;
-	}
-
-	public Edge getEdgeThrough() {
-		return edgeThrough;
+*
+* @author Matteo Martelli matteomartelli3@gmail.com
+*/
+/* Compare the octave jump weight of the nodes in an ArrayList 
+ * for descending order sorting */
+public class WeightComparator  implements Comparator<Edge> {
+    @Override
+    public int compare(Edge e1, Edge e2) {
+		int[] ojumps1 = e1.getAttribute("ojumps");
+		int[] ojumps2 = e2.getAttribute("ojumps");
+		
+		int weight1 = maxOctaveJump(ojumps1);
+		int weight2 = maxOctaveJump(ojumps2);
+		
+    	return ojumps2[weight2] - ojumps1[weight1];
+    }
+    
+    /* Find the max octave jump for an edge. 
+	 * Return the id of the maximum 
+	 */
+	public static int maxOctaveJump(int[] ojumps) {
+		int max, maxIdx;
+		max = maxIdx = 0;
+		for (int i = 0; i < ojumps.length; i++) {
+				if (ojumps[i] > max) {
+					max = ojumps[i];
+					maxIdx = i;
+				}
+		}
+		
+		return maxIdx;
 	}
 	
 }

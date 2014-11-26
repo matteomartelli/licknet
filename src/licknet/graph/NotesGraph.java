@@ -24,8 +24,6 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import licknet.Configuration;
 import licknet.utils.Consts;
 import licknet.lick.Lick;
 
@@ -50,6 +48,8 @@ import org.herac.tuxguitar.io.tg.TGInputStream;
 */
 public class NotesGraph extends SingleGraph {
 	
+	private NotesGraphSettings settings;
+	
 	private final ArrayList<NoteNode> notesSequence;
 	private final ArrayList<Lick> licks;
 	
@@ -59,12 +59,22 @@ public class NotesGraph extends SingleGraph {
 		this.licks = new ArrayList<Lick>();
 	}
 	
+	public void initFromFile(String filePath) throws Exception {
+		NotesGraphSettings defaultSettings = new NotesGraphSettings();
+		initFromFile(filePath, defaultSettings);
+	}
+
+	public void initFromFolder(String folderPath) throws Exception {
+		NotesGraphSettings defaultSettings = new NotesGraphSettings();
+		initFromFolder(folderPath, defaultSettings);
+	}
+	
 	/* Initialize the graph from a tab file.
 	 * This destroys the graph if it's not empty.
 	 * */
-	public void initFromFile(String filePath) 
+	public void initFromFile(String filePath, NotesGraphSettings settings) 
 			throws Exception  {
-		
+		this.settings = settings;
 		this.clear();
 		this.notesSequence.clear();
 		addFromFile(filePath);
@@ -73,7 +83,9 @@ public class NotesGraph extends SingleGraph {
 	/* Initialize the graph from a folder containing tab files. 
 	 * This destroys the graph if it's not empty.
 	 * */
-	public void initFromFolder(String folderPath) throws Exception {
+	public void initFromFolder(String folderPath, NotesGraphSettings settings) 
+			throws Exception {
+		this.settings = settings;
 		this.clear();
 		File dir = new File(folderPath);
 		File[] directoryListing = dir.listFiles();
@@ -226,7 +238,8 @@ public class NotesGraph extends SingleGraph {
 						ojumps[prevOjumpId]++;
 					}	
 				} else {
-					nt = new NoteNode(track, measure, beat, note);
+					nt = new NoteNode(track, measure, beat, note, 
+							settings.isInfluenceBendings());
 
 					notesSequence.add(nt);
 					if (this.getNode(nt.getNodeKey()) == null)
@@ -299,17 +312,20 @@ public class NotesGraph extends SingleGraph {
 	/* Return true if a lick matches in the notesSequcence array starting 
 	 * from the gives startIdx. 
 	*/
-	private boolean matchLick(Lick lick, int startIdx) {
-		boolean match = true;
+	private float matchLick(Lick lick, int startIdx) {
+		int matchedNotes = 0;
 		
-		for (int i = 0, j = i + startIdx; i < lick.getNotes().size(); i++,j++) {
-			if (lick.getNotes().get(i).getNodeKey() != 
+		if (lick.getNotes().size() == 0)
+			return 0;
+		
+		for (int i = 0, j = startIdx; i < lick.getNotes().size(); i++,j++) {
+			if (lick.getNotes().get(i).getNodeKey() == 
 					this.notesSequence.get(j).getNodeKey()) {
-				match = false;
-				break;
+				matchedNotes++;
 			}
 		}
-		return match;
+		
+		return (float)matchedNotes / (float)lick.getNotes().size();
 	}
 	
 	/* Overridden method used to add a NoteNode to a Node during its creation */
@@ -327,10 +343,8 @@ public class NotesGraph extends SingleGraph {
 		licks.clear();
 		
 		ArrayList<Node> startingNodes;
-		int nStartNotes;
 		Node snode;
-		nStartNotes = Configuration.N_START_NODES;
-		
+		int nStartNodes = settings.getnStartNodes();
 		startingNodes = new ArrayList<Node>();
 		
 		if (this.nodeCount == 0)
@@ -342,10 +356,11 @@ public class NotesGraph extends SingleGraph {
 		for (Node node : this.getEachNode()) {
 			startingNodes.add(node);
 		}
+		
 		Collections.sort(startingNodes, new DegreeComparator());
 		
-		if (startingNodes.size() < nStartNotes)
-			nStartNotes = startingNodes.size();
+		if (startingNodes.size() < nStartNodes)
+			nStartNodes = startingNodes.size();
 		
 		/* Make a copy of the edges */
 		for (Edge e : this.getEachEdge()) {
@@ -359,24 +374,28 @@ public class NotesGraph extends SingleGraph {
 		snode = (Node)startingNodes.get(0);
 		/* For each node of the greatest degree set perform a visit 
 		 * starting from that node */
-		for (int i = 0; i < nStartNotes && snode != null; i++) {
+		for (int i = 0; i < nStartNodes && snode != null; i++) {
 			snode = (Node)startingNodes.get(i);
 			
-			Lick lick = lickVisit(snode);
+			for (int j = 0; j < settings.getLickBranching(); j++) {
 			
-			resetEdgesWeights();
-			/* Check if the lick is in the notesSequence */
-			NoteNode fstNode = lick.getNotes().get(0);
-			ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
-			
-			for(Integer si : startIndexes) {
-				if (matchLick(lick, si))
-					lick.incrementOccurrences();
+				Lick lick = lickVisit(snode, j);
+				
+				resetEdgesWeights();
+				/* Check if the lick is in the notesSequence */
+				//NoteNode fstNode = lick.getNotes().get(0);
+				//ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
+				
+				/* Brute force match search */
+				for (int si = 0; si < (notesSequence.size() - lick.getNotes().size()); si++) {
+					if (matchLick(lick, si) > settings.getMinMatchRate())
+						lick.incrementOccurrences();
+				}
+				
+				if (lick.getOccurrences() > 0 && 
+						lick.getNotes().size() >= settings.getLicksMinNotes())
+					licks.add(lick);
 			}
-			
-			/*if (lick.getOccurrences() > 0 && 
-					lick.getNotes().size() >= Configuration.LICKS_MIN_NOTES)*/
-				licks.add(lick);
 		}
 	}	
 
@@ -391,29 +410,29 @@ public class NotesGraph extends SingleGraph {
 			
 	}
 
-	public Lick lickVisit(Node snode){
+	public Lick lickVisit(Node snode, int weightOrderId){
 		int prevOctave, ojumpId, ojump;
 		int[] ojumps;
 		float goalDuration, incDuration;
-		boolean skipJumping;
 		NoteNode note;
 		Lick lick = new Lick();
 		ArrayList<String> visitedNotes = new ArrayList<String>();
 
 		note = null;
-		goalDuration = Configuration.LICK_DURATION;
+		goalDuration = settings.getLickDuration();
 		incDuration = 0;
 		prevOctave = ((NoteNode)(snode.getAttribute("note"))).getOctave();
 		ojumpId = Consts.N_OCTAVES; /* The starting note has ojump of 0 */
 		
+		
 		while (incDuration < goalDuration && 
-				lick.getNotes().size() < Configuration.LICKS_MAX_NOTES 
+				lick.getNotes().size() < settings.getLickMaxNotes() 
 				&& snode != null) {
 			
 			note = new NoteNode((NoteNode)(snode.getAttribute("note")));
 			
-			if (Configuration.LOOPNOTE_INFLUENCE ||  
-					!visitedNotes.contains(note.getNodeKey())) {
+			if (settings.isInfluenceLoopNote() 
+					|| !visitedNotes.contains(note.getNodeKey())) {
 				ojump = ojumpId - Consts.N_OCTAVES;
 				prevOctave += ojump;
 				/* FIXME: Wrong octave with loopnote influence */
@@ -421,17 +440,23 @@ public class NotesGraph extends SingleGraph {
 				lick.getNotes().add(note);
 				visitedNotes.add(note.getNodeKey());
 				incDuration += note.getTime();
-			} else {
-				skipJumping = true;
-			}
-			NodeNext nnext = nextNode(snode);
-			if (nnext == null) {
+			} 
+			
+			/* Copy all the leaving edges of the current node and sort them 
+			 * in their weight descending order. */
+			ArrayList<Edge> leavingEdges = new ArrayList<Edge>(snode.getLeavingEdgeSet());
+			Collections.sort(leavingEdges, new WeightComparator());
+			if (leavingEdges.size() == 0) {
 				snode = null;
 			} else {
-				ojumps = nnext.getEdgeThrough().getAttribute("ojumps");
-				ojumpId = nnext.getOjumpId();
+				int idx = weightOrderId <= leavingEdges.size() - 1? 
+						weightOrderId :
+						leavingEdges.size() - 1;
+				Edge edgeThrough = leavingEdges.get(idx);
+				ojumps = edgeThrough.getAttribute("ojumps");
+				ojumpId = WeightComparator.maxOctaveJump(ojumps);
 				ojumps[ojumpId]--;
-				snode = nnext.getNextNode();
+				snode = edgeThrough.getTargetNode();
 			}
 		}
 		
@@ -439,51 +464,6 @@ public class NotesGraph extends SingleGraph {
 		return lick;
 	}
 	
-	/* Find the max octave jump for an edge. 
-	 * Return the id of the maximum 
-	 */
-	public int maxOctaveJump(int[] ojumps) {
-		int max, maxIdx;
-		max = maxIdx = 0;
-		for (int i = 0; i < ojumps.length; i++) {
-				if (ojumps[i] > max) {
-					max = ojumps[i];
-					maxIdx = i;
-				}
-		}
-		
-		return maxIdx;
-	}
-	
-	/* TODO: return a list of leaving edges decreasing sorted by their max ojump */
-	public NodeNext nextNode(Node node) {
-		Edge bestEdge;
-		int[] maxOjumps;
-		int maxW, maxWId, edgeMaxWId;
-		
-		maxOjumps = null;
-		maxW = maxWId = edgeMaxWId = 0;
-		if (node.getOutDegree() > 0)
-			bestEdge = node.getLeavingEdge(0);
-		else 
-			return null;
-		
-		for (Edge edge : node.getEachLeavingEdge()) {
-			int[] ojumps = edge.getAttribute("ojumps");
-			edgeMaxWId = maxOctaveJump(ojumps);
-			if (ojumps[edgeMaxWId] > maxW) {
-				maxOjumps = ojumps;
-				maxWId = edgeMaxWId;
-				maxW = maxOjumps[maxWId];
-				bestEdge = edge;
-			}
-		}
-		
-		if (maxOjumps == null || bestEdge == null || maxOjumps[maxWId] <= 0)
-			return null;
-		else 
-			return new NodeNext(maxWId, bestEdge.getTargetNode(), bestEdge);
-	}
 
 	public ArrayList<NoteNode> getNotesSequence() {
 		return notesSequence;

@@ -62,7 +62,7 @@ public class Licknet {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		
 
-		Frame jframe = new Frame();
+		new Frame();
 	}
 	
 }
