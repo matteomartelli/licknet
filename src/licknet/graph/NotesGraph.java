@@ -392,9 +392,11 @@ public class NotesGraph extends SingleGraph {
 						lick.incrementOccurrences();
 				}
 				
-				/*if (lick.getOccurrences() > 0 && 
-						lick.getNotes().size() >= settings.getLicksMinNotes())*/
+				if (lick.getOccurrences() > 0 && 
+						lick.getNotes().size() >= settings.getLicksMinNotes())
 					licks.add(lick);
+				
+				Log.printLick(lick);
 			}
 		}
 	}	
@@ -447,13 +449,15 @@ public class NotesGraph extends SingleGraph {
 		}
 		/* Copy all the leaving edges of the current node and sort them 
 		 * in their weight descending order. */
-		ArrayList<Edge> lvEdges = new ArrayList<Edge>(leavingEdges);
+		ArrayList<Edge> lvEdges = new ArrayList<Edge>();
+		lvEdges.addAll(leavingEdges);
 		Collections.sort(lvEdges, new WeightComparator());
 		int branching = settings.getLickBranching() <= lvEdges.size()?
 				settings.getLickBranching() : lvEdges.size();
 		
 		/* For each neighbour of the current node create a new lick starting 
 		 * a new path visit */
+		Lick branchLick = new Lick(lick); /* Store the lick before going ahead */
 		for (int i = 0; i < branching; i++) {
 			WeightEdge ledge = new WeightEdge(getEdge(lvEdges.get(i).getId()));
 			if (ledge.getMaxOctaveJump() == 0)
@@ -466,7 +470,6 @@ public class NotesGraph extends SingleGraph {
 				/* Best edge neighbour */
 				search(neighbour, lick, flicks);
 			} else {
-				Lick branchLick = new Lick(lick);
 				search(neighbour, branchLick, flicks);
 			}
 		}

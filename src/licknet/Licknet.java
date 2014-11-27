@@ -44,12 +44,10 @@ public class Licknet {
 		
 		graph.initFromFile(filePath);*/
 		
-		graph.initFromFolder("data/hendrix");
+		graph.initFromFolder("data/jimi hendrix");
 		
-		for (Node node : graph.getEachNode()) {
+		for (Node node : graph.getEachNode())
 			node.addAttribute("ui.label", node.getId());
-		}
-		
 		
 		Log.printNotesSequence(graph.getNotesSequence());
 		
@@ -61,7 +59,6 @@ public class Licknet {
 		
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		
-
 		new Frame();
 	}
 	

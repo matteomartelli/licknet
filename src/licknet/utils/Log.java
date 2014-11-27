@@ -50,18 +50,22 @@ public class Log {
 		
 	}	
 
+	static public void printLick(Lick lick) {
+		System.out.print("[");
+		for (int i = 0; i < lick.getNotes().size(); i++) {
+			NoteNode note = lick.getNotes().get(i);
+			System.out.print(note.getNodeKey() + ":oc"+ note.getOctave());
+			if (i < lick.getNotes().size() - 1) {
+				System.out.print(", ");
+			}
+		}
+		System.out.print("], occures " + lick.getOccurrences() + " times");
+		System.out.println(", duration: " + lick.getDuration());
+	}
+	
 	static public void printLicks(ArrayList<Lick> licks) {
 		for (Lick lick : licks) {
-			System.out.print("[");
-			for (int i = 0; i < lick.getNotes().size(); i++) {
-				NoteNode note = lick.getNotes().get(i);
-				System.out.print(note.getNodeKey() + ":oc"+ note.getOctave());
-				if (i < lick.getNotes().size() - 1) {
-					System.out.print(", ");
-				}
-			}
-			System.out.print("], occures " + lick.getOccurrences() + " times");
-			System.out.println(", duration: " + lick.getDuration());
+			printLick(lick);
 		}
 	}
 	

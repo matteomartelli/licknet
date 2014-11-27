@@ -20,6 +20,8 @@ package licknet.lick;
 import licknet.graph.NoteNode;
 import java.util.ArrayList;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
+
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
@@ -40,7 +42,8 @@ public class Lick {
 	public Lick(Lick lick) {
 		this.duration = lick.getDuration();
 		this.occurrences = lick.getOccurrences();
-		this.notes = new ArrayList<NoteNode>(lick.getNotes());
+		this.notes = new ArrayList<NoteNode>();
+		this.notes.addAll(lick.getNotes());
 	}
 	
 	public float getDuration() {
