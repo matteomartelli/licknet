@@ -20,6 +20,7 @@ package licknet.graph;
 import java.util.Comparator;
 
 import org.graphstream.graph.Edge;
+import org.graphstream.graph.implementations.AbstractEdge;
 
 /**
 *
@@ -30,29 +31,10 @@ import org.graphstream.graph.Edge;
 public class WeightComparator  implements Comparator<Edge> {
     @Override
     public int compare(Edge e1, Edge e2) {
-		int[] ojumps1 = e1.getAttribute("ojumps");
-		int[] ojumps2 = e2.getAttribute("ojumps");
-		
-		int weight1 = maxOctaveJump(ojumps1);
-		int weight2 = maxOctaveJump(ojumps2);
-		
-    	return ojumps2[weight2] - ojumps1[weight1];
+    	
+    	WeightEdge we1 = new WeightEdge(e1);
+    	WeightEdge we2 = new WeightEdge(e2);  	
+    	
+    	return we2.getMaxOctaveJump() - we1.getMaxOctaveJump();
     }
-    
-    /* Find the max octave jump for an edge. 
-	 * Return the id of the maximum 
-	 */
-	public static int maxOctaveJump(int[] ojumps) {
-		int max, maxIdx;
-		max = maxIdx = 0;
-		for (int i = 0; i < ojumps.length; i++) {
-				if (ojumps[i] > max) {
-					max = ojumps[i];
-					maxIdx = i;
-				}
-		}
-		
-		return maxIdx;
-	}
-	
 }

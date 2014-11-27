@@ -36,12 +36,23 @@ public class Lick {
 		this.occurrences = 0;
 	}
 	
+	/* Copy constructor */
+	public Lick(Lick lick) {
+		this.duration = lick.getDuration();
+		this.occurrences = lick.getOccurrences();
+		this.notes = new ArrayList<NoteNode>(lick.getNotes());
+	}
+	
 	public float getDuration() {
 		return duration;
 	}
 
 	public void setDuration(float duration) {
 		this.duration = duration;
+	}
+	
+	public void addDuration(float duration) {
+		this.duration += duration;
 	}
 
 	public void addNote(NoteNode note) {
@@ -59,6 +70,7 @@ public class Lick {
 	public void setOccurrences(int occurrences) {
 		this.occurrences = occurrences;
 	}
+
 	
 	public void incrementOccurrences() {
 		this.occurrences++;

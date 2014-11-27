@@ -18,6 +18,7 @@
 package licknet.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
@@ -71,7 +72,7 @@ public class Log {
 		}
 	}
 	
-	static public void printEdges(ArrayList<Edge> edges) {
+	static public void printEdges(Collection<Edge> edges) {
 		System.out.println("Edges:");
 		for (Edge e : edges) {
 			int[] ojumps = e.getAttribute("ojumps");

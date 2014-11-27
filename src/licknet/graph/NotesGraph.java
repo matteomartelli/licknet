@@ -23,8 +23,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import licknet.utils.Consts;
+import licknet.utils.Log;
 import licknet.lick.Lick;
 
 import org.graphstream.graph.*;
@@ -376,30 +378,30 @@ public class NotesGraph extends SingleGraph {
 		 * starting from that node */
 		for (int i = 0; i < nStartNodes && snode != null; i++) {
 			snode = (Node)startingNodes.get(i);
+							
 			
-			for (int j = 0; j < settings.getLickBranching(); j++) {
+			//NoteNode fstNode = lick.getNotes().get(0);
+			//ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
 			
-				Lick lick = lickVisit(snode, j);
-				
-				resetEdgesWeights();
-				/* Check if the lick is in the notesSequence */
-				//NoteNode fstNode = lick.getNotes().get(0);
-				//ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
-				
+			/* Check if any of the found the lick is in the notesSequence */
+			for (Lick lick : lickVisit(snode)) {
 				/* Brute force match search */
-				for (int si = 0; si < (notesSequence.size() - lick.getNotes().size()); si++) {
+				int size = (notesSequence.size() - lick.getNotes().size());
+				for (int si = 0; si < size; si++) {
 					if (matchLick(lick, si) > settings.getMinMatchRate())
 						lick.incrementOccurrences();
 				}
 				
-				if (lick.getOccurrences() > 0 && 
-						lick.getNotes().size() >= settings.getLicksMinNotes())
+				/*if (lick.getOccurrences() > 0 && 
+						lick.getNotes().size() >= settings.getLicksMinNotes())*/
 					licks.add(lick);
 			}
 		}
 	}	
 
 	public void resetEdgesWeights() {
+		/* TODO: find a way to backup all the edges without breaking the graph
+		 * in case of their removal */
 		for (Edge e : this.getEachEdge()) {
 			int[] ojumpsBak = e.getAttribute("ojumpsBak");
 			int[] ojumps = e.getAttribute("ojumps");
@@ -410,60 +412,130 @@ public class NotesGraph extends SingleGraph {
 			
 	}
 
-	public Lick lickVisit(Node snode, int weightOrderId){
-		int prevOctave, ojumpId, ojump;
-		int[] ojumps;
-		float goalDuration, incDuration;
-		NoteNode note;
-		Lick lick = new Lick();
-		ArrayList<String> visitedNotes = new ArrayList<String>();
-
-		note = null;
-		goalDuration = settings.getLickDuration();
-		incDuration = 0;
-		prevOctave = ((NoteNode)(snode.getAttribute("note"))).getOctave();
-		ojumpId = Consts.N_OCTAVES; /* The starting note has ojump of 0 */
+	
+	public void search(Node cnode, Lick lick, ArrayList<Lick> flicks) {
+		Collection<Edge> leavingEdges = cnode.getLeavingEdgeSet();
 		
-		
-		while (incDuration < goalDuration && 
-				lick.getNotes().size() < settings.getLickMaxNotes() 
-				&& snode != null) {
-			
-			note = new NoteNode((NoteNode)(snode.getAttribute("note")));
-			
-			if (settings.isInfluenceLoopNote() 
-					|| !visitedNotes.contains(note.getNodeKey())) {
-				ojump = ojumpId - Consts.N_OCTAVES;
-				prevOctave += ojump;
-				/* FIXME: Wrong octave with loopnote influence */
-				note.setOctave(prevOctave);
-				lick.getNotes().add(note);
-				visitedNotes.add(note.getNodeKey());
-				incDuration += note.getTime();
-			} 
-			
-			/* Copy all the leaving edges of the current node and sort them 
-			 * in their weight descending order. */
-			ArrayList<Edge> leavingEdges = new ArrayList<Edge>(snode.getLeavingEdgeSet());
-			Collections.sort(leavingEdges, new WeightComparator());
-			if (leavingEdges.size() == 0) {
-				snode = null;
-			} else {
-				int idx = weightOrderId <= leavingEdges.size() - 1? 
-						weightOrderId :
-						leavingEdges.size() - 1;
-				Edge edgeThrough = leavingEdges.get(idx);
-				ojumps = edgeThrough.getAttribute("ojumps");
-				ojumpId = WeightComparator.maxOctaveJump(ojumps);
-				ojumps[ojumpId]--;
-				snode = edgeThrough.getTargetNode();
-			}
+		int zeroW;
+		for (zeroW = 0; zeroW < leavingEdges.size(); zeroW++) {
+			WeightEdge ledge = new WeightEdge(cnode.getLeavingEdge(zeroW));
+			if (ledge.getMaxOctaveJump() > 0)
+				break;
 		}
 		
-		lick.setDuration(incDuration);
-		return lick;
+		if (zeroW >= leavingEdges.size() - 1 ||
+				cnode.getOutDegree() == 0 || 
+				lick.getDuration() >= settings.getLickDuration() ||
+				lick.getNotes().size() > settings.getLickMaxNotes()) {
+			/* This path search is finished, add the lick to the licks set 
+			 * and restore the initial status of the graph. */
+			flicks.add(lick);
+			resetEdgesWeights();
+			return;
+		}
+		
+			
+		/* Add the current node to the the current lick. */
+		NoteNode cnote = (NoteNode)cnode.getAttribute("note");
+		NoteNode prevNote = lick.getNotes().size() == 0 ? null :
+			lick.getNotes().get(lick.getNotes().size() - 1);
+		
+		if (settings.isInfluenceLoopNote() || prevNote == null
+				|| !cnote.getNodeKey().equals(prevNote.getNodeKey())) {		
+			lick.addNote(cnote);
+			lick.addDuration(cnote.getTime());
+		}
+		/* Copy all the leaving edges of the current node and sort them 
+		 * in their weight descending order. */
+		ArrayList<Edge> lvEdges = new ArrayList<Edge>(leavingEdges);
+		Collections.sort(lvEdges, new WeightComparator());
+		int branching = settings.getLickBranching() <= lvEdges.size()?
+				settings.getLickBranching() : lvEdges.size();
+		
+		/* For each neighbour of the current node create a new lick starting 
+		 * a new path visit */
+		for (int i = 0; i < branching; i++) {
+			WeightEdge ledge = new WeightEdge(getEdge(lvEdges.get(i).getId()));
+			if (ledge.getMaxOctaveJump() == 0)
+				continue;
+			
+			ledge.decreaseMaxOctaveJump(); /* Decrease the visited octave weight */
+			
+			Node neighbour = ledge.getEdge().getTargetNode();
+			if (i == 0) {
+				/* Best edge neighbour */
+				search(neighbour, lick, flicks);
+			} else {
+				Lick branchLick = new Lick(lick);
+				search(neighbour, branchLick, flicks);
+			}
+		}
 	}
 	
+	public ArrayList<Lick> lickVisit(Node snode) {
+		ArrayList<Lick> foundLicks = new ArrayList<Lick>();
+		Lick slick = new Lick();
+		/* Perform a N path recursive search */
+		search(snode, slick, foundLicks);
+		
+		return foundLicks;
+	}
+	
+//	
+//	public Lick lickVisit(Node snode, int weightOrderId){
+//		int prevOctave, ojumpId, ojump;
+//		int[] ojumps;
+//		float goalDuration, incDuration;
+//		NoteNode note;
+//		Lick lick = new Lick();
+//		ArrayList<String> visitedNotes = new ArrayList<String>();
+//
+//		note = null;
+//		goalDuration = settings.getLickDuration();
+//		incDuration = 0;
+//		prevOctave = ((NoteNode)(snode.getAttribute("note"))).getOctave();
+//		ojumpId = Consts.N_OCTAVES; /* The starting note has ojump of 0 */
+//		
+//		
+//		while (incDuration < goalDuration && 
+//				lick.getNotes().size() < settings.getLickMaxNotes() 
+//				&& snode != null) {
+//			
+//			note = new NoteNode((NoteNode)(snode.getAttribute("note")));
+//			
+//			if (settings.isInfluenceLoopNote() 
+//					|| !visitedNotes.contains(note.getNodeKey())) {
+//				ojump = ojumpId - Consts.N_OCTAVES;
+//				prevOctave += ojump;
+//				/* FIXME: Wrong octave with loopnote influence */
+//				note.setOctave(prevOctave);
+//				lick.getNotes().add(note);
+//				visitedNotes.add(note.getNodeKey());
+//				incDuration += note.getTime();
+//			} 
+//			
+//			/* Copy all the leaving edges of the current node and sort them 
+//			 * in their weight descending order. */
+//			ArrayList<Edge> leavingEdges = new ArrayList<Edge>(snode.getLeavingEdgeSet());
+//			Collections.sort(leavingEdges, new WeightComparator());
+//			if (leavingEdges.size() == 0) {
+//				snode = null;
+//			} else {
+//				int idx = weightOrderId <= leavingEdges.size() - 1? 
+//						weightOrderId :
+//						leavingEdges.size() - 1;
+//				Edge edgeThrough = leavingEdges.get(idx);
+//				ojumps = edgeThrough.getAttribute("ojumps");
+//				ojumpId = WeightComparator.maxOctaveJump(ojumps);
+//				ojumps[ojumpId]--;
+//				snode = edgeThrough.getTargetNode();
+//			}
+//		}
+//		
+//		lick.setDuration(incDuration);
+//		return lick;
+//	}
+//	
 
 	public ArrayList<NoteNode> getNotesSequence() {
 		return notesSequence;

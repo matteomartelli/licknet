@@ -1,14 +1,14 @@
 package licknet.graph;
 
 public class NotesGraphSettings {
-	public static final int DEFAULT_LICK_BRANCHING = 30;
-	public static final int DEFAULT_N_START_NODES = 50;
+	public static final int DEFAULT_LICK_BRANCHING = 2;
+	public static final int DEFAULT_N_START_NODES = 3;
 	public static final float DEFAULT_LICK_DURATION = 1.0f;
 	public static final int DEFAULT_LICK_MIN_NOTES = 3;
-	public static final int DEFAULT_LICK_MAX_NOTES = 10;
-	public static final float DEFAULT_MIN_MATCH_RATE = 0.68f;
-	public static final boolean DEFAULT_INFLUENCE_BENDINGS = false;
-	public static final boolean DEFAULT_INFLUENCE_LOOPNOTE = false;
+	public static final int DEFAULT_LICK_MAX_NOTES = 8;
+	public static final float DEFAULT_MIN_MATCH_RATE = 0.70f;
+	public static final boolean DEFAULT_INFLUENCE_BENDINGS = true;
+	public static final boolean DEFAULT_INFLUENCE_LOOPNOTE = true;
 	
 	private int lickBranching = DEFAULT_LICK_BRANCHING;
 	private int nStartNodes = DEFAULT_N_START_NODES;
@@ -19,9 +19,7 @@ public class NotesGraphSettings {
 	private boolean influenceBendings = DEFAULT_INFLUENCE_BENDINGS;
 	private boolean influenceLoopNote = DEFAULT_INFLUENCE_LOOPNOTE;
 	
-	public NotesGraphSettings() {
-		
-	}
+	public NotesGraphSettings() {}
 
 
 	public int getLickBranching() {
