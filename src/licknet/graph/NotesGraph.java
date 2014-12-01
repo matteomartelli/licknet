@@ -21,6 +21,7 @@ import licknet.graph.NoteNode;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,6 +72,12 @@ public class NotesGraph extends SingleGraph {
 		initFromFolder(folderPath, defaultSettings);
 	}
 	
+	
+	public void initFromSubFolders(String folderPath) throws Exception {
+		NotesGraphSettings defaultSettings = new NotesGraphSettings();
+		initFromSubFolders(folderPath, defaultSettings);
+	}
+	
 	/* Initialize the graph from a tab file.
 	 * This destroys the graph if it's not empty.
 	 * */
@@ -89,12 +96,22 @@ public class NotesGraph extends SingleGraph {
 			throws Exception {
 		this.settings = settings;
 		this.clear();
+		addFromFolder(folderPath);
+	}
+	
+	/* Initialize the graph from from the 1 level sub-folders contained in the given path. 
+	 * This destroys the graph if it's not empty.
+	 * */
+	public void initFromSubFolders(String folderPath, NotesGraphSettings settings) 
+			throws Exception {
+		this.settings = settings;
+		this.clear();
 		File dir = new File(folderPath);
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
 			for (File child : directoryListing) {
-				if (child.isFile())
-					addFromFile(child.getPath());
+				if (child.isDirectory())
+					addFromFolder(child.getPath());
 			}
 		} else {
 			throw new Exception("Not a directory");
@@ -105,7 +122,7 @@ public class NotesGraph extends SingleGraph {
 	 * This destroys the graph if it's not empty. */
 	public void importFromGraphFile(String filePath) {
 		this.clear();
-		
+		/* TODO */
 	}
 	
 	public void addFromFile(String filePath) 
@@ -205,20 +222,20 @@ public class NotesGraph extends SingleGraph {
 						int[] ojumps;
 						if (edge != null) {
 							ojumps = edge.getAttribute("ojumps");
-							if (ojumps[prevOjumpId] > 0) {
+							if (ojumps[prevOjumpId] > 0) 
 								ojumps[prevOjumpId]--;
-								int sum = 0;
-								for (int k = 0; k < ojumps.length; k++)
-									sum += ojumps[k];
-								if (sum == 0) {
-									this.removeEdge(edge);
-									if (this.getNode(Pk).getDegree() == 0)
-										this.removeNode(Pk);
-								}
-							} else {
-								ojumps[prevOjumpId] = 0;
-								System.err.println("WARNING: Negative weight!");
+							else if (ojumps[prevOjumpId] < 0)
+								System.err.println("WARNING: Negative weight!");	
+							
+							int sum = 0;
+							for (int k = 0; k < ojumps.length; k++)
+								sum += ojumps[k];
+							if (sum == 0) {
+								this.removeEdge(edge);
+								if (this.getNode(Pk).getDegree() == 0)
+									this.removeNode(Pk);
 							}
+							
 						}
 						
 						/* Create a new node if it does not exist */
@@ -292,6 +309,19 @@ public class NotesGraph extends SingleGraph {
 		data.close();
 	}
 
+	public void addFromFolder(String folderPath) throws Exception {
+		File dir = new File(folderPath);
+		File[] directoryListing = dir.listFiles();
+		if (directoryListing != null) {
+			for (File child : directoryListing) {
+				if (child.isFile())
+					addFromFile(child.getPath());
+			}
+		} else {
+			throw new Exception("Not a directory");
+		}
+	}
+	
 	private String generateEdgeKey(String Ak, String Bk) {
 		return Ak + "->" + Bk;
 	}
@@ -334,6 +364,7 @@ public class NotesGraph extends SingleGraph {
 	public Node addNode(String key, NoteNode note) {
 		Node node = this.addNode(key);
 		node.addAttribute("note", note);
+		node.addAttribute("ui.label", node.getId());
 		return node;
 	}
 	
@@ -379,12 +410,13 @@ public class NotesGraph extends SingleGraph {
 		for (int i = 0; i < nStartNodes && snode != null; i++) {
 			snode = (Node)startingNodes.get(i);
 							
-			
+			System.out.println("lickvisit "+ i +" start");
 			//NoteNode fstNode = lick.getNotes().get(0);
 			//ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
 			
+			ArrayList<Lick> visitedLicks = lickVisit(snode);
 			/* Check if any of the found the lick is in the notesSequence */
-			for (Lick lick : lickVisit(snode)) {
+			for (Lick lick : visitedLicks) {
 				/* Brute force match search */
 				int size = (notesSequence.size() - lick.getNotes().size());
 				for (int si = 0; si < size; si++) {
@@ -396,27 +428,27 @@ public class NotesGraph extends SingleGraph {
 						lick.getNotes().size() >= settings.getLicksMinNotes())
 					licks.add(lick);
 				
-				Log.printLick(lick);
+				System.out.println(visitedLicks.indexOf(lick) + " ");/*FIXME: WTF? */
+				Log.printLick(lick); 
 			}
+			
 		}
 	}	
-
-	public void resetEdgesWeights() {
-		/* TODO: find a way to backup all the edges without breaking the graph
-		 * in case of their removal */
-		for (Edge e : this.getEachEdge()) {
-			int[] ojumpsBak = e.getAttribute("ojumpsBak");
-			int[] ojumps = e.getAttribute("ojumps");
-			
-			if (!Arrays.equals(ojumpsBak, ojumps))
-				System.arraycopy(ojumpsBak, 0, ojumps, 0, ojumpsBak.length);
-		}
-			
-	}
-
 	
-	public void search(Node cnode, Lick lick, ArrayList<Lick> flicks) {
+	private void search(Node cnode, Lick lick, ArrayList<Lick> flicks) {
 		Collection<Edge> leavingEdges = cnode.getLeavingEdgeSet();
+					
+		/* Add the current node to the the current lick. */
+		NoteNode cnote = (NoteNode)cnode.getAttribute("note");
+		NoteNode prevNote = lick.getNotes().size() == 0 ? null :
+			lick.getNotes().get(lick.getNotes().size() - 1);
+		
+		if (settings.isInfluenceLoopNote() || prevNote == null
+				|| !cnote.getNodeKey().equals(prevNote.getNodeKey())) {		
+			lick.addNote(cnote);
+			lick.addDuration(cnote.getTime());
+			//Log.printLick(lick);
+		}
 		
 		int zeroW;
 		for (zeroW = 0; zeroW < leavingEdges.size(); zeroW++) {
@@ -428,25 +460,14 @@ public class NotesGraph extends SingleGraph {
 		if (zeroW >= leavingEdges.size() - 1 ||
 				cnode.getOutDegree() == 0 || 
 				lick.getDuration() >= settings.getLickDuration() ||
-				lick.getNotes().size() > settings.getLickMaxNotes()) {
+				lick.getNotes().size() >= settings.getLickMaxNotes()) {
 			/* This path search is finished, add the lick to the licks set 
 			 * and restore the initial status of the graph. */
 			flicks.add(lick);
-			resetEdgesWeights();
+			//System.out.println("lick added");
 			return;
 		}
 		
-			
-		/* Add the current node to the the current lick. */
-		NoteNode cnote = (NoteNode)cnode.getAttribute("note");
-		NoteNode prevNote = lick.getNotes().size() == 0 ? null :
-			lick.getNotes().get(lick.getNotes().size() - 1);
-		
-		if (settings.isInfluenceLoopNote() || prevNote == null
-				|| !cnote.getNodeKey().equals(prevNote.getNodeKey())) {		
-			lick.addNote(cnote);
-			lick.addDuration(cnote.getTime());
-		}
 		/* Copy all the leaving edges of the current node and sort them 
 		 * in their weight descending order. */
 		ArrayList<Edge> lvEdges = new ArrayList<Edge>();
@@ -457,7 +478,8 @@ public class NotesGraph extends SingleGraph {
 		
 		/* For each neighbour of the current node create a new lick starting 
 		 * a new path visit */
-		Lick branchLick = new Lick(lick); /* Store the lick before going ahead */
+		Lick branchLick = branching > 1 ? new Lick(lick) : null; /* Store the lick before going ahead */
+		
 		for (int i = 0; i < branching; i++) {
 			WeightEdge ledge = new WeightEdge(getEdge(lvEdges.get(i).getId()));
 			if (ledge.getMaxOctaveJump() == 0)
@@ -466,16 +488,16 @@ public class NotesGraph extends SingleGraph {
 			ledge.decreaseMaxOctaveJump(); /* Decrease the visited octave weight */
 			
 			Node neighbour = ledge.getEdge().getTargetNode();
-			if (i == 0) {
-				/* Best edge neighbour */
-				search(neighbour, lick, flicks);
-			} else {
+			if (i == 0)
+				search(neighbour, lick, flicks); /* Best edge neighbour */
+			else
 				search(neighbour, branchLick, flicks);
-			}
+			
+			ledge.resetWeights(); /* FIXME: some problem with hendix and loopnote avoidance */
 		}
 	}
 	
-	public ArrayList<Lick> lickVisit(Node snode) {
+	private ArrayList<Lick> lickVisit(Node snode) {
 		ArrayList<Lick> foundLicks = new ArrayList<Lick>();
 		Lick slick = new Lick();
 		/* Perform a N path recursive search */

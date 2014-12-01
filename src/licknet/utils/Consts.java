@@ -26,7 +26,7 @@ public class Consts {
 	public static final int N_OCTAVES = 6; /* GUITAR OCATVES */
 	public static final int N_SEMITONES = 12;
 	public static final int REST_NOTE = 13;
-	public static final int N_GUITAR_FRETS = 24;										
+	public static final int N_GUITAR_FRETS = 26;										
 	public static final int[] KSINGS_MAP = 
 		{0, 7, 2, 9, 4, 11, 6, 1, 5, 10, 3, 8, 1, 6, 11};
 	/*   C  G  D  A  E  B   F# C# F  Bb  Eb Ab Db Gb Cb  */

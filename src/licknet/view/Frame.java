@@ -21,8 +21,16 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.swing.JFrame;
+
+import org.graphstream.ui.graphicGraph.GraphicGraph;
+import org.graphstream.ui.swingViewer.View;
+import org.graphstream.ui.swingViewer.Viewer;
+
 import licknet.app.LickNetApp;
 import licknet.graph.NotesGraph;
+import licknet.utils.Log;
 
 /**
  *
@@ -145,7 +153,10 @@ public class Frame extends javax.swing.JFrame {
 
     private void displayGraphMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_displayGraphMouseClicked
         NotesGraph graph = (NotesGraph)graphsList.getSelectedValue();
-		graph.display();
+        Viewer viewer = graph.display();
+        viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+        graph.findLicks();
+        
     }//GEN-LAST:event_displayGraphMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

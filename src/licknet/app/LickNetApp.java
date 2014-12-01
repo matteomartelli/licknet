@@ -32,7 +32,7 @@ public class LickNetApp {
 	
 	private static String graphsFolder = DEFAULT_GRAPHS_FOLDER;
 	private static final ArrayList<NotesGraph> notesGraphs = new ArrayList<>();
-	
+	private static NotesGraph wholeGraph = new NotesGraph("Whole");
 	
 	protected LickNetApp() {}
 	
@@ -64,9 +64,21 @@ public class LickNetApp {
 				if (child.isDirectory()) {
 					NotesGraph ng = new NotesGraph(child.getName());
 					ng.initFromFolder(child.getPath());
-					notesGraphs.add(ng);
+					if (ng.getNodeCount() > 0)
+						notesGraphs.add(ng);
+					else 
+						ng = null;
 				}
 			}
+			wholeGraph.initFromSubFolders(graphsFolder);
 		}
 	}
+
+	
+	public static NotesGraph getWholeGraph() {
+		return wholeGraph;
+	}
+	
+	
+
 }

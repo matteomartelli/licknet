@@ -1,5 +1,7 @@
 package licknet.graph;
 
+import java.util.Arrays;
+
 import org.graphstream.graph.Edge;
 public class WeightEdge {
 
@@ -35,6 +37,13 @@ public class WeightEdge {
 		int[] ojumps = edge.getAttribute("ojumps");
 		int maxId = getMaxOctaveJumpId();
 		ojumps[maxId]--;
+	}
+	
+	public void resetWeights() {
+		int[] ojumpsBak = edge.getAttribute("ojumpsBak");
+		int[] ojumps = edge.getAttribute("ojumps");
+		
+		System.arraycopy(ojumpsBak, 0, ojumps, 0, ojumpsBak.length);
 	}
 	
 
