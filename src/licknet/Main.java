@@ -20,16 +20,13 @@ package licknet;
 import licknet.graph.NotesGraph;
 import licknet.view.Frame;
 import javax.swing.UIManager;
-import licknet.utils.Log;
-
-import org.graphstream.graph.Node;
 
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
 
-public class Licknet {
+public class Main {
 	
 	/**
 	 * @param args the command line arguments
@@ -43,8 +40,8 @@ public class Licknet {
 		/*String filePath = "data/hendrix/Jimi Hendrix - Foxy Lady.tg";
 		
 		graph.initFromFile(filePath);*/
-		
-		graph.initFromFolder("data/jimi hendrix");
+	
+		/*graph.initFromFolder("data/jimi hendrix");
 		
 		for (Node node : graph.getEachNode())
 			node.addAttribute("ui.label", node.getId());
@@ -56,10 +53,10 @@ public class Licknet {
 		Log.printLicks(graph.getLicks());
 
 		graph.display();
-		
+		*/
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		
-		new Frame();
+		new Frame().setVisible(true);
 	}
 	
 }

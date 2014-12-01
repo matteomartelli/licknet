@@ -20,8 +20,6 @@ package licknet.lick;
 import licknet.graph.NoteNode;
 import java.util.ArrayList;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
-
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
