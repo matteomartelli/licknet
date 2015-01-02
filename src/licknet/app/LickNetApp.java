@@ -18,8 +18,15 @@
 package licknet.app;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import licknet.graph.NotesGraph;
+import licknet.graph.NotesGraphSettings;
+import licknet.lick.Lick;
+import licknet.lick.LickClassifier;
+import licknet.lick.LickGraphScore;
+import org.herac.tuxguitar.io.base.TGFileFormatException;
 
 /**
  *
@@ -28,11 +35,18 @@ import licknet.graph.NotesGraph;
 public class LickNetApp {
 	private static LickNetApp instance = null;
 	
-	private static final String DEFAULT_GRAPHS_FOLDER = "data";
+	private final String DEFAULT_DATA_FOLDER = "data";
+	private final String DEFAULT_GRAPHS_FOLDER_PATH = DEFAULT_DATA_FOLDER + "/tracks";
+	private final String DEFAULT_UNKNOWN_LICK_FILE = DEFAULT_DATA_FOLDER + "/licks/unknown_lick.tg";
 	
-	private static String graphsFolder = DEFAULT_GRAPHS_FOLDER;
-	private static final ArrayList<NotesGraph> notesGraphs = new ArrayList<>();
-	private static NotesGraph wholeGraph = new NotesGraph("Whole");
+	private String dataFolder = DEFAULT_DATA_FOLDER;
+	private String graphsFolderPath = DEFAULT_GRAPHS_FOLDER_PATH;
+	private String unknownLickFile = DEFAULT_UNKNOWN_LICK_FILE;
+	private final ArrayList<NotesGraph> notesGraphs = new ArrayList<>();
+	private final NotesGraph wholeGraph = new NotesGraph("Whole");
+	private boolean useWholeGraph = false;
+	private NotesGraphSettings settings;	
+	private LickClassifier lickClassifier;
 	
 	protected LickNetApp() {}
 	
@@ -43,42 +57,95 @@ public class LickNetApp {
 		return instance;
 	}
 
-	public String getGraphsFolder() {
-		return graphsFolder;
+	public String getDataFolder() {
+		return dataFolder;
 	}
 
-	public void setGraphsFolder(String graphsFolder) {
-		LickNetApp.graphsFolder = graphsFolder;
+	public void setDataFolder(String dataFolder) {
+		this.dataFolder = dataFolder;
+	}
+	
+	public String getGraphsFolderPath() {
+		return graphsFolderPath;
 	}
 
+	public void setGraphsFolderPath(String graphsFolderPath) {
+		this.graphsFolderPath = graphsFolderPath;
+	}
+
+	public String getUnknownLickFile() {
+		return unknownLickFile;
+	}
+
+	public void setUnknownLickFile(String unknownLickFile) {
+		this.unknownLickFile = unknownLickFile;
+	}
+	
 	public ArrayList<NotesGraph> getNotesGraphs() {
 		return notesGraphs;
 	}	
 	
-	public void createGraphs() throws Exception {
+	public void createGraphs(NotesGraphSettings settings) throws Exception {
+		this.settings = settings;
+		
+		/* Clear the previous structures, if non-empty */
+		for (NotesGraph graph : notesGraphs)
+			graph.clear();	
+		wholeGraph.clear();
 		notesGraphs.clear();
-		File dir = new File(graphsFolder);
+		
+		
+		File dir = new File(graphsFolderPath);
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
+			/* Create N graphs, where N is the number of subfolders 
+			 * of graphsFolderPath. */
 			for (File child : directoryListing) {
 				if (child.isDirectory()) {
 					NotesGraph ng = new NotesGraph(child.getName());
-					ng.initFromFolder(child.getPath());
+					ng.initFromFolder(child.getPath(), settings);
 					if (ng.getNodeCount() > 0)
 						notesGraphs.add(ng);
-					else 
-						ng = null;
 				}
 			}
-			wholeGraph.initFromSubFolders(graphsFolder);
+			/* Create the whole graph that includes all the other N graphs. */
+			wholeGraph.initFromSubFolders(graphsFolderPath, settings);
 		}
 	}
 
-	
-	public static NotesGraph getWholeGraph() {
-		return wholeGraph;
+	public void classifyUnknownLick() 
+			throws IOException, TGFileFormatException {
+		Lick uLick = new Lick();
+		uLick.importFromFile(unknownLickFile, settings);
+		lickClassifier = new LickClassifier(notesGraphs, uLick);
+		lickClassifier.classify();	
 	}
 	
+	public Object[][] getGraphsScores() {
+		Object[][] graphsScores = new Object[lickClassifier.getGraphs().size()][2];
+		
+		for (int i = 0; i < lickClassifier.getGraphs().size(); i++) {
+			LickGraphScore lgs = lickClassifier.getGraphs().get(i);
+			graphsScores[i][0] = lgs.getGraph().getId();
+			graphsScores[i][1] = lgs.getScore();
+		}
+		
+		return graphsScores;
+	} 
 	
+	public int getBestGraphId() {
+		return lickClassifier.getBestGraphId();
+	}
+	
+	public NotesGraph getWholeGraph() {
+		return wholeGraph;
+	}
 
+	public boolean isUseWholeGraph() {
+		return useWholeGraph;
+	}
+
+	public void setUseWholeGraph(boolean useWholeGraph) {
+		this.useWholeGraph = useWholeGraph;
+	}
 }

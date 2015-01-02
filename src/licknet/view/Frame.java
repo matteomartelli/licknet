@@ -18,11 +18,17 @@
 package licknet.view;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
+import java.awt.AWTEvent;
+import java.awt.event.ItemEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.table.TableCellEditor;
 
 import org.graphstream.ui.graphicGraph.GraphicGraph;
 import org.graphstream.ui.swingViewer.View;
@@ -30,7 +36,9 @@ import org.graphstream.ui.swingViewer.Viewer;
 
 import licknet.app.LickNetApp;
 import licknet.graph.NotesGraph;
+import licknet.graph.NotesGraphSettings;
 import licknet.utils.Log;
+import org.herac.tuxguitar.io.base.TGFileFormatException;
 
 /**
  *
@@ -55,39 +63,232 @@ public class Frame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        browseButton = new javax.swing.JButton();
+        jTextField1 = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
-        graphsList = new javax.swing.JList();
-        createGraphsButton = new javax.swing.JButton();
-        displayGraph = new javax.swing.JButton();
+        jListGraphs = new javax.swing.JList();
+        jButtonDisplayGraph = new javax.swing.JButton();
+        jTabbedPaneLicks = new javax.swing.JTabbedPane();
+        jPanelGraphsSettings = new javax.swing.JPanel();
+        jCheckBoxInfluenceBending = new javax.swing.JCheckBox();
+        jCheckBoxInfluenceLoopNote = new javax.swing.JCheckBox();
+        jButtonCreateGraphs = new javax.swing.JButton();
+        jTextFieldBrowseGraphs = new javax.swing.JTextField();
+        jButtonBrowseGraphs = new javax.swing.JButton();
+        jLabelBrowseGraphs = new javax.swing.JLabel();
+        jPanelLickClassify = new javax.swing.JPanel();
+        jLabelBrowseLick = new javax.swing.JLabel();
+        jButtonBrowseLick = new javax.swing.JButton();
+        jTextFieldBrowseLick = new javax.swing.JTextField();
+        jButtonClassifyLick = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTableGraphsScores = new javax.swing.JTable();
+        jLabelBestGraph = new javax.swing.JLabel();
+        jPanelLickGenerate = new javax.swing.JPanel();
+        jLabelGraphsList = new javax.swing.JLabel();
+        jCheckBoxWholeGraph = new javax.swing.JCheckBox();
+
+        jTextField1.setText("jTextField1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        browseButton.setText("Browse...");
-        browseButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                browseButtonMouseClicked(evt);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
             }
         });
 
-        graphsList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        graphsList.setToolTipText("");
-        jScrollPane1.setViewportView(graphsList);
-        graphsList.getAccessibleContext().setAccessibleParent(this);
+        jListGraphs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jListGraphs.setToolTipText("");
+        jScrollPane1.setViewportView(jListGraphs);
+        jListGraphs.getAccessibleContext().setAccessibleParent(this);
 
-        createGraphsButton.setText("Create Graphs");
-        createGraphsButton.setToolTipText("Create the graphs from the default folder");
-        createGraphsButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                createGraphsButtonMouseClicked(evt);
+        jButtonDisplayGraph.setText("Display");
+        jButtonDisplayGraph.setToolTipText("");
+        jButtonDisplayGraph.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDisplayGraphActionPerformed(evt);
             }
         });
 
-        displayGraph.setText("Display");
-        displayGraph.setToolTipText("");
-        displayGraph.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                displayGraphMouseClicked(evt);
+        jCheckBoxInfluenceBending.setText("Consider Bendings");
+
+        jCheckBoxInfluenceLoopNote.setText("Consider Repeated Notes");
+
+        jButtonCreateGraphs.setText("Regenerate Graphs");
+        jButtonCreateGraphs.setToolTipText("Create the graphs from the default folder");
+        jButtonCreateGraphs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCreateGraphsActionPerformed(evt);
+            }
+        });
+
+        jTextFieldBrowseGraphs.setEditable(false);
+        jTextFieldBrowseGraphs.setText(app.getGraphsFolderPath());
+
+        jButtonBrowseGraphs.setText("Browse...");
+        jButtonBrowseGraphs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseGraphsActionPerformed(evt);
+            }
+        });
+
+        jLabelBrowseGraphs.setText("Select a different graphs source folder");
+
+        javax.swing.GroupLayout jPanelGraphsSettingsLayout = new javax.swing.GroupLayout(jPanelGraphsSettings);
+        jPanelGraphsSettings.setLayout(jPanelGraphsSettingsLayout);
+        jPanelGraphsSettingsLayout.setHorizontalGroup(
+            jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelGraphsSettingsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelGraphsSettingsLayout.createSequentialGroup()
+                        .addComponent(jTextFieldBrowseGraphs)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonBrowseGraphs))
+                    .addGroup(jPanelGraphsSettingsLayout.createSequentialGroup()
+                        .addGroup(jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jCheckBoxInfluenceLoopNote)
+                            .addComponent(jCheckBoxInfluenceBending)
+                            .addComponent(jButtonCreateGraphs, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelBrowseGraphs))
+                        .addGap(0, 112, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanelGraphsSettingsLayout.setVerticalGroup(
+            jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelGraphsSettingsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabelBrowseGraphs)
+                .addGap(3, 3, 3)
+                .addGroup(jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldBrowseGraphs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBrowseGraphs))
+                .addGap(28, 28, 28)
+                .addComponent(jCheckBoxInfluenceBending)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jCheckBoxInfluenceLoopNote)
+                .addGap(52, 52, 52)
+                .addComponent(jButtonCreateGraphs)
+                .addContainerGap(142, Short.MAX_VALUE))
+        );
+
+        jTabbedPaneLicks.addTab("Graphs Settings", jPanelGraphsSettings);
+
+        jLabelBrowseLick.setText("Select a lick to be classified");
+
+        jButtonBrowseLick.setText("Browse...");
+        jButtonBrowseLick.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonBrowseLickActionPerformed(evt);
+            }
+        });
+
+        jTextFieldBrowseLick.setEditable(false);
+        jTextFieldBrowseLick.setText(app.getUnknownLickFile());
+
+        jButtonClassifyLick.setText("Classify Lick");
+        jButtonClassifyLick.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClassifyLickActionPerformed(evt);
+            }
+        });
+
+        jTableGraphsScores.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Graph", "Score"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Float.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableGraphsScores.getTableHeader().setReorderingAllowed(false);
+        jScrollPane2.setViewportView(jTableGraphsScores);
+        if (jTableGraphsScores.getColumnModel().getColumnCount() > 0) {
+            jTableGraphsScores.getColumnModel().getColumn(0).setResizable(false);
+            jTableGraphsScores.getColumnModel().getColumn(0).setHeaderValue("Graph");
+            jTableGraphsScores.getColumnModel().getColumn(1).setResizable(false);
+            jTableGraphsScores.getColumnModel().getColumn(1).setHeaderValue("Score");
+        }
+
+        javax.swing.GroupLayout jPanelLickClassifyLayout = new javax.swing.GroupLayout(jPanelLickClassify);
+        jPanelLickClassify.setLayout(jPanelLickClassifyLayout);
+        jPanelLickClassifyLayout.setHorizontalGroup(
+            jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelLickClassifyLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonBrowseLick)
+                        .addContainerGap())
+                    .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
+                        .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
+                                .addComponent(jButtonClassifyLick)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabelBestGraph))
+                            .addComponent(jLabelBrowseLick))
+                        .addGap(0, 0, Short.MAX_VALUE))))
+        );
+        jPanelLickClassifyLayout.setVerticalGroup(
+            jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabelBrowseLick)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonBrowseLick)
+                    .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonClassifyLick)
+                    .addComponent(jLabelBestGraph))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(25, Short.MAX_VALUE))
+        );
+
+        jTabbedPaneLicks.addTab("Classify Lick", jPanelLickClassify);
+
+        javax.swing.GroupLayout jPanelLickGenerateLayout = new javax.swing.GroupLayout(jPanelLickGenerate);
+        jPanelLickGenerate.setLayout(jPanelLickGenerateLayout);
+        jPanelLickGenerateLayout.setHorizontalGroup(
+            jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 379, Short.MAX_VALUE)
+        );
+        jPanelLickGenerateLayout.setVerticalGroup(
+            jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 366, Short.MAX_VALUE)
+        );
+
+        jTabbedPaneLicks.addTab("Generate Lick", jPanelLickGenerate);
+
+        jLabelGraphsList.setText("Graphs List");
+
+        jCheckBoxWholeGraph.setText("Whole Graph");
+        jCheckBoxWholeGraph.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxWholeGraphItemStateChanged(evt);
             }
         });
 
@@ -98,50 +299,63 @@ public class Frame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(createGraphsButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 468, Short.MAX_VALUE)
-                        .addComponent(browseButton))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(displayGraph, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addGap(25, 25, 25)
+                        .addComponent(jLabelGraphsList))
+                    .addComponent(jButtonDisplayGraph, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxWholeGraph, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jTabbedPaneLicks, javax.swing.GroupLayout.PREFERRED_SIZE, 395, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(18, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(browseButton)
-                    .addComponent(createGraphsButton))
-                .addGap(5, 5, 5)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(displayGraph)
-                .addContainerGap(292, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(18, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTabbedPaneLicks, javax.swing.GroupLayout.PREFERRED_SIZE, 413, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(jLabelGraphsList)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(8, 8, 8)
+                        .addComponent(jCheckBoxWholeGraph)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonDisplayGraph)))
+                .addGap(33, 33, 33))
         );
-
-        browseButton.getAccessibleContext().setAccessibleName("browseButton");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void browseButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_browseButtonMouseClicked
-        // TODO add your handling code here:
-		System.out.println("mouse clicked");
-    }//GEN-LAST:event_browseButtonMouseClicked
-
-    private void createGraphsButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_createGraphsButtonMouseClicked
-        
+	private NotesGraph getSelectedGraph() {
+		NotesGraph graph;
+		if (app.isUseWholeGraph())
+			graph = app.getWholeGraph();
+		else 
+			graph = (NotesGraph)jListGraphs.getSelectedValue();
+		
+		return graph;
+	}
+	
+	private void createGraphs() {
+		NotesGraphSettings settings = new NotesGraphSettings();
+		
+		boolean isInfluenceBending = jCheckBoxInfluenceBending.isSelected();
+		settings.setInfluenceBendings(isInfluenceBending);
+		
+		boolean isInfluenceLoopNote = jCheckBoxInfluenceLoopNote.isSelected();
+		settings.setInfluenceLoopNote(isInfluenceLoopNote);
+		
 		try {
-			app.createGraphs();
+			app.createGraphs(settings);
 		} catch (Exception ex) {
 			Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		
-		graphsList.setModel(new javax.swing.AbstractListModel() {
+		jListGraphs.setModel(new javax.swing.AbstractListModel() {
 			@Override
             public int getSize() { return app.getNotesGraphs().size(); }
 			@Override
@@ -149,21 +363,104 @@ public class Frame extends javax.swing.JFrame {
 					return app.getNotesGraphs().get(i);
 			}
         });
-    }//GEN-LAST:event_createGraphsButtonMouseClicked
+	}
+	
+    private void jButtonCreateGraphsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateGraphsActionPerformed
+        createGraphs();
+    }//GEN-LAST:event_jButtonCreateGraphsActionPerformed
 
-    private void displayGraphMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_displayGraphMouseClicked
-        NotesGraph graph = (NotesGraph)graphsList.getSelectedValue();
-        Viewer viewer = graph.display();
-        viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
-        graph.findLicks();
-        
-    }//GEN-LAST:event_displayGraphMouseClicked
+    private void jButtonDisplayGraphActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDisplayGraphActionPerformed
+        NotesGraph graph;
+		graph = getSelectedGraph();
+		
+		if (graph == null) {
+			JOptionPane.showMessageDialog(this,
+				"Select a graph from the graph list or the whole graph.\n",
+				"Warning",
+				JOptionPane.WARNING_MESSAGE);
+		} else {
+			Viewer viewer = graph.display();
+			viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+		}
+    }//GEN-LAST:event_jButtonDisplayGraphActionPerformed
+
+    private void jButtonBrowseLickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseLickActionPerformed
+		JFileChooser c = new JFileChooser(app.getDataFolder());
+		if (c.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			String path = c.getSelectedFile().getAbsolutePath();
+			app.setUnknownLickFile(path);
+			jTextFieldBrowseLick.setText(path);
+		}
+    }//GEN-LAST:event_jButtonBrowseLickActionPerformed
+
+    private void jCheckBoxWholeGraphItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxWholeGraphItemStateChanged
+      	if (evt.getStateChange() == ItemEvent.SELECTED) {
+			jListGraphs.setEnabled(false);
+			app.setUseWholeGraph(true);
+		} else {
+			jListGraphs.setEnabled(true);
+			app.setUseWholeGraph(false);
+		}
+    }//GEN-LAST:event_jCheckBoxWholeGraphItemStateChanged
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+		createGraphs();
+    }//GEN-LAST:event_formWindowOpened
+
+    private void jButtonBrowseGraphsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseGraphsActionPerformed
+		JFileChooser c = new JFileChooser();
+		c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		c.setAcceptAllFileFilterUsed(false);
+		if (c.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			String path = c.getSelectedFile().getAbsolutePath();
+			app.setGraphsFolderPath(path);
+			jTextFieldBrowseGraphs.setText(path);
+		}
+    }//GEN-LAST:event_jButtonBrowseGraphsActionPerformed
+
+    private void jButtonClassifyLickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClassifyLickActionPerformed
+		try {
+			app.classifyUnknownLick();
+		} catch (IOException | TGFileFormatException ex) {
+			Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		
+		Object[][] graphsScores = app.getGraphsScores();
+		
+		jTableGraphsScores.setModel(new javax.swing.table.DefaultTableModel(
+            graphsScores,
+            new String [] {
+                "Graph", "Score"
+            }
+        ));
+		
+		jLabelBestGraph.setText("Best: " + (String)graphsScores[app.getBestGraphId()][0]);
+		
+    }//GEN-LAST:event_jButtonClassifyLickActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton browseButton;
-    private javax.swing.JButton createGraphsButton;
-    private javax.swing.JButton displayGraph;
-    private javax.swing.JList graphsList;
+    private javax.swing.JButton jButtonBrowseGraphs;
+    private javax.swing.JButton jButtonBrowseLick;
+    private javax.swing.JButton jButtonClassifyLick;
+    private javax.swing.JButton jButtonCreateGraphs;
+    private javax.swing.JButton jButtonDisplayGraph;
+    private javax.swing.JCheckBox jCheckBoxInfluenceBending;
+    private javax.swing.JCheckBox jCheckBoxInfluenceLoopNote;
+    private javax.swing.JCheckBox jCheckBoxWholeGraph;
+    private javax.swing.JLabel jLabelBestGraph;
+    private javax.swing.JLabel jLabelBrowseGraphs;
+    private javax.swing.JLabel jLabelBrowseLick;
+    private javax.swing.JLabel jLabelGraphsList;
+    private javax.swing.JList jListGraphs;
+    private javax.swing.JPanel jPanelGraphsSettings;
+    private javax.swing.JPanel jPanelLickClassify;
+    private javax.swing.JPanel jPanelLickGenerate;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTabbedPane jTabbedPaneLicks;
+    private javax.swing.JTable jTableGraphsScores;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextFieldBrowseGraphs;
+    private javax.swing.JTextField jTextFieldBrowseLick;
     // End of variables declaration//GEN-END:variables
 }

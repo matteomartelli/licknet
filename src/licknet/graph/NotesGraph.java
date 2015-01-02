@@ -17,33 +17,23 @@
  */
 package licknet.graph;
 
-import licknet.graph.NoteNode;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import licknet.io.SongFileLoader;
 import licknet.utils.Consts;
 import licknet.utils.Log;
 import licknet.lick.Lick;
 
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
-import org.herac.tuxguitar.io.gpx.GPXInputStream;
-import org.herac.tuxguitar.io.gtp.GP3InputStream;
-import org.herac.tuxguitar.io.gtp.GP4InputStream;
-import org.herac.tuxguitar.io.gtp.GP5InputStream;
-import org.herac.tuxguitar.io.gtp.GTPSettings;
-import org.herac.tuxguitar.song.factory.TGFactory;
+import org.herac.tuxguitar.io.base.TGFileFormatException;
 import org.herac.tuxguitar.song.models.TGBeat;
 import org.herac.tuxguitar.song.models.TGMeasure;
 import org.herac.tuxguitar.song.models.TGNote;
-import org.herac.tuxguitar.song.models.TGSong;
 import org.herac.tuxguitar.song.models.TGTrack;
-import org.herac.tuxguitar.io.tg.TGInputStream;
 
 /**
 *
@@ -126,51 +116,19 @@ public class NotesGraph extends SingleGraph {
 	}
 	
 	public void addFromFile(String filePath) 
-			throws Exception {
-		TGFactory factory = new TGFactory();
+			throws IOException, TGFileFormatException {
 		
-		
-		FileInputStream file = new FileInputStream(filePath);
-		DataInputStream data = new DataInputStream(file);
-		TGSong song;
-		/* WARNING: Unsupported key signature with guitar pro files */
-		if (filePath.endsWith(".gp3")) {
-			GTPSettings gtpsettings = new GTPSettings();
-			GP3InputStream gp3 = new GP3InputStream(gtpsettings);
-			gp3.init(factory, data);
-			song = gp3.readSong();
-		} else if (filePath.endsWith(".gp4")) {
-			GTPSettings gtpsettings = new GTPSettings();
-			GP4InputStream gp4 = new GP4InputStream(gtpsettings);
-			gp4.init(factory, data);
-			song = gp4.readSong();
-		} else if (filePath.endsWith(".gp5")) {
-			GTPSettings gtpsettings = new GTPSettings();
-			GP5InputStream gp5 = new GP5InputStream(gtpsettings);
-			gp5.init(factory, data);
-			song = gp5.readSong();
-		} else if (filePath.endsWith(".gpx")) {
-			GPXInputStream gpx = new GPXInputStream();
-			gpx.init(factory, data);
-			song = gpx.readSong();
-		}else if (filePath.endsWith(".tg")) {
-			TGInputStream tg = new TGInputStream();
-			tg.init(factory, data);
-			song = tg.readSong();
-		} else {
-			file.close();
-			data.close();
-			throw new Exception("Unsupported file format");
-		}
+		SongFileLoader songFile = new SongFileLoader(filePath);
 		
 		/* Assuming we are interested in the 0th track TODO: what about this? */
-		TGTrack track = song.getTrack(0);
+		TGTrack track = songFile.getSong().getTrack(0);
+		
 		
 		int beatCount;
 		NoteNode nt, prevNt;
 		nt = prevNt = null;
 		
-		beatCount = 0;
+		beatCount = notesSequence.size();
 		
 		for (int i = 0; i < track.countMeasures(); i++) {
 			TGMeasure measure = track.getMeasure(i);
@@ -178,19 +136,19 @@ public class NotesGraph extends SingleGraph {
 			for (int j = 0; j < measure.countBeats(); j++) {
 				TGBeat beat = measure.getBeat(j);
 				
-				TGNote note = beat.getVoice(0).getNote(0);
+				TGNote tgNote = beat.getVoice(0).getNote(0);
 				
 				if (beatCount > 0)
 					prevNt = (NoteNode)notesSequence.get(beatCount - 1);
 				
 				/* If the node is tied, merge it to the previous one */
-				if (note != null && prevNt != null && note.isTiedNote()) {
+				if (tgNote != null && prevNt != null && tgNote.isTiedNote()) {
 					String PPk, Pk, Nk, Ek;
 					Pk = prevNt.getNodeKey();
 					
-					/* Copy the previous note and merge it with the new one */
+					/* Copy the previous tgNote and merge it with the new one */
 					NoteNode newNote = new NoteNode(prevNt);
-					newNote.mergeNote(note);
+					newNote.mergeNote(tgNote);
 					Nk = newNote.getNodeKey();
 					
 					/* Remove the previous one from the notes sequence and add 
@@ -257,15 +215,20 @@ public class NotesGraph extends SingleGraph {
 						ojumps[prevOjumpId]++;
 					}	
 				} else {
-					nt = new NoteNode(track, measure, beat, note, 
+					nt = new NoteNode(track, measure, beat, tgNote, 
 							settings.isInfluenceBendings());
+					
+					/* Skip the repeated notes if specified in the settings */
+					if (prevNt != null && settings.isInfluenceLoopNote() && 
+							nt.getNodeKey().equals(prevNt.getNodeKey()))
+						continue;
 
 					notesSequence.add(nt);
 					if (this.getNode(nt.getNodeKey()) == null)
 						this.addNode(nt.getNodeKey(), nt);
 					
-					/* Add the note to the graph and the edge between this note
-					 * and the previous note. */
+					/* Add the tgNote to the graph and the edge between this tgNote
+					 * and the previous tgNote. */
 					if (prevNt != null && beatCount > 0) {
 						String Ak, Bk, Ek;
 						Edge edge;
@@ -305,8 +268,6 @@ public class NotesGraph extends SingleGraph {
 				this.removeNode(n);
 			}
 		}
-		file.close();
-		data.close();
 	}
 
 	public void addFromFolder(String folderPath) throws Exception {
@@ -362,10 +323,17 @@ public class NotesGraph extends SingleGraph {
 	
 	/* Overridden method used to add a NoteNode to a Node during its creation */
 	public Node addNode(String key, NoteNode note) {
-		Node node = this.addNode(key);
+		Node node = addNode(key);
 		node.addAttribute("note", note);
 		node.addAttribute("ui.label", node.getId());
 		return node;
+	}
+	
+	@Override
+	public void clear() {
+		notesSequence.clear();
+		licks.clear();
+		super.clear();
 	}
 	
 	/* TODO: addEdge(..., int[] ojumps)*/
@@ -384,8 +352,7 @@ public class NotesGraph extends SingleGraph {
 			return;
 		
 		/* TODO: this can be done copying the array of notes from the graph
-		 * if there is a way to get it 
-		 */
+		 * if there is a way to get it */
 		for (Node node : this.getEachNode()) {
 			startingNodes.add(node);
 		}
@@ -415,7 +382,7 @@ public class NotesGraph extends SingleGraph {
 			//ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
 			
 			ArrayList<Lick> visitedLicks = lickVisit(snode);
-			/* Check if any of the found the lick is in the notesSequence */
+			/* Check if any note of the found lick is in the notesSequence */
 			for (Lick lick : visitedLicks) {
 				/* Brute force match search */
 				int size = (notesSequence.size() - lick.getNotes().size());
@@ -443,12 +410,12 @@ public class NotesGraph extends SingleGraph {
 		NoteNode prevNote = lick.getNotes().size() == 0 ? null :
 			lick.getNotes().get(lick.getNotes().size() - 1);
 		
-		if (settings.isInfluenceLoopNote() || prevNote == null
-				|| !cnote.getNodeKey().equals(prevNote.getNodeKey())) {		
-			lick.addNote(cnote);
-			lick.addDuration(cnote.getTime());
-			//Log.printLick(lick);
-		}
+//		if (settings.isInfluenceLoopNote() || prevNote == null
+//				|| !cnote.getNodeKey().equals(prevNote.getNodeKey())) {		
+//			lick.addNote(cnote);
+//			lick.addDuration(cnote.getTime());
+//			//Log.printLick(lick);
+//		}
 		
 		int zeroW;
 		for (zeroW = 0; zeroW < leavingEdges.size(); zeroW++) {
@@ -506,62 +473,14 @@ public class NotesGraph extends SingleGraph {
 		return foundLicks;
 	}
 	
-//	
-//	public Lick lickVisit(Node snode, int weightOrderId){
-//		int prevOctave, ojumpId, ojump;
-//		int[] ojumps;
-//		float goalDuration, incDuration;
-//		NoteNode note;
-//		Lick lick = new Lick();
-//		ArrayList<String> visitedNotes = new ArrayList<String>();
-//
-//		note = null;
-//		goalDuration = settings.getLickDuration();
-//		incDuration = 0;
-//		prevOctave = ((NoteNode)(snode.getAttribute("note"))).getOctave();
-//		ojumpId = Consts.N_OCTAVES; /* The starting note has ojump of 0 */
-//		
-//		
-//		while (incDuration < goalDuration && 
-//				lick.getNotes().size() < settings.getLickMaxNotes() 
-//				&& snode != null) {
-//			
-//			note = new NoteNode((NoteNode)(snode.getAttribute("note")));
-//			
-//			if (settings.isInfluenceLoopNote() 
-//					|| !visitedNotes.contains(note.getNodeKey())) {
-//				ojump = ojumpId - Consts.N_OCTAVES;
-//				prevOctave += ojump;
-//				/* FIXME: Wrong octave with loopnote influence */
-//				note.setOctave(prevOctave);
-//				lick.getNotes().add(note);
-//				visitedNotes.add(note.getNodeKey());
-//				incDuration += note.getTime();
-//			} 
-//			
-//			/* Copy all the leaving edges of the current node and sort them 
-//			 * in their weight descending order. */
-//			ArrayList<Edge> leavingEdges = new ArrayList<Edge>(snode.getLeavingEdgeSet());
-//			Collections.sort(leavingEdges, new WeightComparator());
-//			if (leavingEdges.size() == 0) {
-//				snode = null;
-//			} else {
-//				int idx = weightOrderId <= leavingEdges.size() - 1? 
-//						weightOrderId :
-//						leavingEdges.size() - 1;
-//				Edge edgeThrough = leavingEdges.get(idx);
-//				ojumps = edgeThrough.getAttribute("ojumps");
-//				ojumpId = WeightComparator.maxOctaveJump(ojumps);
-//				ojumps[ojumpId]--;
-//				snode = edgeThrough.getTargetNode();
-//			}
-//		}
-//		
-//		lick.setDuration(incDuration);
-//		return lick;
-//	}
-//	
-
+	public Edge getEdge(String Ak, String Bk) {
+		return getEdge(generateEdgeKey(Ak, Bk));
+	}
+	
+	public Edge getEdge(Node A, Node B) {
+		return getEdge(A.getId(), B.getId());
+	}
+	
 	public ArrayList<NoteNode> getNotesSequence() {
 		return notesSequence;
 	}
@@ -569,6 +488,19 @@ public class NotesGraph extends SingleGraph {
 	public ArrayList<Lick> getLicks() {
 		return licks;
 	}
-
 	
+	public int getMaxWeight() {
+		int max, w;
+		WeightEdge wedge;
+		max = 0;
+		
+		for (Edge e : getEachEdge()) {
+			wedge = new WeightEdge(e);
+			w = wedge.getMaxOctaveJump();
+			if (w > max)
+				max = w;
+		}
+		
+		return max;
+	}
 }

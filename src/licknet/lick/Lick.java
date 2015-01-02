@@ -17,8 +17,16 @@
  */
 package licknet.lick;
 
+import java.io.IOException;
 import licknet.graph.NoteNode;
 import java.util.ArrayList;
+import licknet.graph.NotesGraphSettings;
+import licknet.io.SongFileLoader;
+import org.herac.tuxguitar.io.base.TGFileFormatException;
+import org.herac.tuxguitar.song.models.TGBeat;
+import org.herac.tuxguitar.song.models.TGMeasure;
+import org.herac.tuxguitar.song.models.TGNote;
+import org.herac.tuxguitar.song.models.TGTrack;
 
 /**
  *
@@ -42,6 +50,50 @@ public class Lick {
 		this.occurrences = lick.getOccurrences();
 		this.notes = new ArrayList<NoteNode>();
 		this.notes.addAll(lick.getNotes());
+	}
+	
+	public void importFromFile(String filePath, NotesGraphSettings settings) 
+			throws IOException, TGFileFormatException {
+		SongFileLoader songFile = new SongFileLoader(filePath);
+		
+		/* Assuming we are interested in the 0th track TODO: what about this? */
+		TGTrack track = songFile.getSong().getTrack(0);
+		
+		NoteNode nt, prevNt;
+		nt = prevNt = null;
+		
+		for (int i = 0; i < track.countMeasures(); i++) {
+			TGMeasure measure = track.getMeasure(i);
+			
+			for (int j = 0; j < measure.countBeats(); j++) {
+				TGBeat beat = measure.getBeat(j);
+				
+				TGNote tgNote = beat.getVoice(0).getNote(0);
+				
+				/* If the node is tied, merge it to the previous one */
+				if (tgNote != null && prevNt != null && tgNote.isTiedNote()) {
+					/* Copy the previous tgNote and merge it with the new one */
+					NoteNode newNote = new NoteNode(prevNt);
+					newNote.mergeNote(tgNote);
+					
+					/* Remove the previous one from the notes sequence and add 
+					 * the new one to it */
+					notes.remove(notes.size() - 1);
+					notes.add(newNote);
+				} else {
+					nt = new NoteNode(track, measure, beat, tgNote, 
+							settings.isInfluenceBendings());
+					
+					/* Skip the repeated notes if specified in the settings */
+					if (prevNt != null && settings.isInfluenceLoopNote() && 
+							nt.getNodeKey().equals(prevNt.getNodeKey()))
+						continue;
+
+					notes.add(nt);
+					duration += nt.getTime();
+				}
+			}
+		}
 	}
 	
 	public float getDuration() {

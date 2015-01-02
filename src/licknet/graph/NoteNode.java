@@ -47,7 +47,7 @@ public class NoteNode {
 			   ((TGString)track.getStrings().get(note.getString() - 1)).getValue());
 	}
 	
-	NoteNode (TGTrack track, TGMeasure measure, TGBeat beat, TGNote note, 
+	public NoteNode (TGTrack track, TGMeasure measure, TGBeat beat, TGNote note, 
 			  boolean influenceBendings) {
 		int midi, transposed;
 		TGDuration tgDuration;
@@ -97,7 +97,7 @@ public class NoteNode {
 	}
 	
 	/* Copy constructor */
-	NoteNode(NoteNode note) {
+	public NoteNode(NoteNode note) {
 		this.baseNote = note.getBaseNote();
 		this.octave = note.getOctave();
 		this.time = note.getTime();

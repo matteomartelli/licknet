@@ -24,3 +24,10 @@ nbproject
 build.xml
 manifest.mf
 dist
+
+#Tex compile files
+report/*.log
+report/*.fdb_latexmk
+report/*.aux
+report/*.out
+report/*.sty
