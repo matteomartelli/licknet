@@ -43,7 +43,8 @@ public class NotesGraph extends SingleGraph {
 	
 	private NotesGraphSettings settings;
 	
-	private final ArrayList<NoteNode> notesSequence;
+	/* TODO: this should be freed, too much memory needed */
+	private final ArrayList<NoteNode> notesSequence;  
 	private final ArrayList<Lick> licks;
 	
 	public NotesGraph(String id) {

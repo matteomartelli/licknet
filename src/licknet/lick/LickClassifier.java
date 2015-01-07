@@ -77,7 +77,7 @@ public class LickClassifier {
 					if (prevGNode == null) {
 						prevGNode = gNode;
 					} else {
-						//FIXME: doesn't match all the notes
+						//FIXME: check if it matches all the notes
 						Edge e = graph.getEdge(prevGNode, gNode);
 						if (e != null) {
 							WeightEdge wedge = new WeightEdge(e);
@@ -93,13 +93,13 @@ public class LickClassifier {
 					prevGNode = null;
 				}
 			}
-			/* normalize with the graph insertions number */
-			score /= (float)graph.getNotesSequence().size();
+			/* Normalize with the graph insertions number */
 			graphscore.setScore(score);
+			graphscore.normalizeScore();
 			int currentIdx = graphs.indexOf(graphscore);
 			if (bestGraphId == -1)
 				bestGraphId = currentIdx;
-			else if (score > graphs.get(bestGraphId).getScore())
+			else if (graphscore.getScore() > graphs.get(bestGraphId).getScore())
 				bestGraphId = currentIdx;
 		}
 	}

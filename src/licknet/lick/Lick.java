@@ -109,6 +109,7 @@ public class Lick {
 	}
 
 	public void addNote(NoteNode note) {
+		/* TODO: Directly increase the duration here and remove the method */
 		this.notes.add(note);
 	}
 	

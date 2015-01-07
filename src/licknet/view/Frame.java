@@ -17,27 +17,19 @@
  */
 package licknet.view;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
-import java.awt.AWTEvent;
 import java.awt.event.ItemEvent;
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.table.TableCellEditor;
-
-import org.graphstream.ui.graphicGraph.GraphicGraph;
-import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
 
 import licknet.app.LickNetApp;
 import licknet.graph.NotesGraph;
 import licknet.graph.NotesGraphSettings;
-import licknet.utils.Log;
+import licknet.lick.LickGeneratorSettings;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 
 /**
@@ -51,6 +43,7 @@ public class Frame extends javax.swing.JFrame {
 	 * Creates new form Frame
 	 */
 	public Frame() {
+		setTitle("Licknet");
 		initComponents();
 	}
 
@@ -64,9 +57,12 @@ public class Frame extends javax.swing.JFrame {
     private void initComponents() {
 
         jTextField1 = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
+        jLabelGraphsList = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jListGraphs = new javax.swing.JList();
         jButtonDisplayGraph = new javax.swing.JButton();
+        jCheckBoxWholeGraph = new javax.swing.JCheckBox();
         jTabbedPaneLicks = new javax.swing.JTabbedPane();
         jPanelGraphsSettings = new javax.swing.JPanel();
         jCheckBoxInfluenceBending = new javax.swing.JCheckBox();
@@ -84,8 +80,9 @@ public class Frame extends javax.swing.JFrame {
         jTableGraphsScores = new javax.swing.JTable();
         jLabelBestGraph = new javax.swing.JLabel();
         jPanelLickGenerate = new javax.swing.JPanel();
-        jLabelGraphsList = new javax.swing.JLabel();
-        jCheckBoxWholeGraph = new javax.swing.JCheckBox();
+        jButtonGenerateLicks = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTableGeneratedLicks = new javax.swing.JTable();
 
         jTextField1.setText("jTextField1");
 
@@ -95,6 +92,8 @@ public class Frame extends javax.swing.JFrame {
                 formWindowOpened(evt);
             }
         });
+
+        jLabelGraphsList.setText("Graphs List");
 
         jListGraphs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jListGraphs.setToolTipText("");
@@ -106,6 +105,13 @@ public class Frame extends javax.swing.JFrame {
         jButtonDisplayGraph.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDisplayGraphActionPerformed(evt);
+            }
+        });
+
+        jCheckBoxWholeGraph.setText("Whole Graph");
+        jCheckBoxWholeGraph.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCheckBoxWholeGraphItemStateChanged(evt);
             }
         });
 
@@ -150,7 +156,7 @@ public class Frame extends javax.swing.JFrame {
                             .addComponent(jCheckBoxInfluenceBending)
                             .addComponent(jButtonCreateGraphs, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabelBrowseGraphs))
-                        .addGap(0, 112, Short.MAX_VALUE)))
+                        .addGap(0, 188, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanelGraphsSettingsLayout.setVerticalGroup(
@@ -168,7 +174,7 @@ public class Frame extends javax.swing.JFrame {
                 .addComponent(jCheckBoxInfluenceLoopNote)
                 .addGap(52, 52, 52)
                 .addComponent(jButtonCreateGraphs)
-                .addContainerGap(142, Short.MAX_VALUE))
+                .addContainerGap(228, Short.MAX_VALUE))
         );
 
         jTabbedPaneLicks.addTab("Graphs Settings", jPanelGraphsSettings);
@@ -234,12 +240,11 @@ public class Frame extends javax.swing.JFrame {
             .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelLickClassifyLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
+                        .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonBrowseLick)
-                        .addContainerGap())
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
                         .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -265,67 +270,92 @@ public class Frame extends javax.swing.JFrame {
                     .addComponent(jLabelBestGraph))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(25, Short.MAX_VALUE))
+                .addContainerGap(111, Short.MAX_VALUE))
         );
 
         jTabbedPaneLicks.addTab("Classify Lick", jPanelLickClassify);
+
+        jButtonGenerateLicks.setText("Generate Licks");
+        jButtonGenerateLicks.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGenerateLicksActionPerformed(evt);
+            }
+        });
+
+        jTableGeneratedLicks.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Score", "Lick"
+            }
+        ));
+        jTableGeneratedLicks.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jScrollPane3.setViewportView(jTableGeneratedLicks);
 
         javax.swing.GroupLayout jPanelLickGenerateLayout = new javax.swing.GroupLayout(jPanelLickGenerate);
         jPanelLickGenerate.setLayout(jPanelLickGenerateLayout);
         jPanelLickGenerateLayout.setHorizontalGroup(
             jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 379, Short.MAX_VALUE)
+            .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
+                    .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
+                        .addComponent(jButtonGenerateLicks)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanelLickGenerateLayout.setVerticalGroup(
             jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 366, Short.MAX_VALUE)
+            .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButtonGenerateLicks)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(106, Short.MAX_VALUE))
         );
 
         jTabbedPaneLicks.addTab("Generate Lick", jPanelLickGenerate);
 
-        jLabelGraphsList.setText("Graphs List");
-
-        jCheckBoxWholeGraph.setText("Whole Graph");
-        jCheckBoxWholeGraph.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jCheckBoxWholeGraphItemStateChanged(evt);
-            }
-        });
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(25, 25, 25)
-                        .addComponent(jLabelGraphsList))
-                    .addComponent(jButtonDisplayGraph, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jCheckBoxWholeGraph, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTabbedPaneLicks, javax.swing.GroupLayout.PREFERRED_SIZE, 395, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(jButtonDisplayGraph, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jCheckBoxWholeGraph, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE))
+                    .addComponent(jLabelGraphsList, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jTabbedPaneLicks))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(18, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPaneLicks, javax.swing.GroupLayout.PREFERRED_SIZE, 413, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(31, 31, 31)
-                        .addComponent(jLabelGraphsList)
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jTabbedPaneLicks, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabelGraphsList, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(8, 8, 8)
                         .addComponent(jCheckBoxWholeGraph)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonDisplayGraph)))
-                .addGap(33, 33, 33))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonDisplayGraph)
+                        .addGap(178, 178, 178))))
         );
+
+        getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_START);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -365,10 +395,6 @@ public class Frame extends javax.swing.JFrame {
         });
 	}
 	
-    private void jButtonCreateGraphsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateGraphsActionPerformed
-        createGraphs();
-    }//GEN-LAST:event_jButtonCreateGraphsActionPerformed
-
     private void jButtonDisplayGraphActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDisplayGraphActionPerformed
         NotesGraph graph;
 		graph = getSelectedGraph();
@@ -407,17 +433,6 @@ public class Frame extends javax.swing.JFrame {
 		createGraphs();
     }//GEN-LAST:event_formWindowOpened
 
-    private void jButtonBrowseGraphsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseGraphsActionPerformed
-		JFileChooser c = new JFileChooser();
-		c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		c.setAcceptAllFileFilterUsed(false);
-		if (c.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			String path = c.getSelectedFile().getAbsolutePath();
-			app.setGraphsFolderPath(path);
-			jTextFieldBrowseGraphs.setText(path);
-		}
-    }//GEN-LAST:event_jButtonBrowseGraphsActionPerformed
-
     private void jButtonClassifyLickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClassifyLickActionPerformed
 		try {
 			app.classifyUnknownLick();
@@ -438,12 +453,51 @@ public class Frame extends javax.swing.JFrame {
 		
     }//GEN-LAST:event_jButtonClassifyLickActionPerformed
 
+    private void jButtonGenerateLicksActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateLicksActionPerformed
+        NotesGraph graph;
+		graph = getSelectedGraph();
+		
+		if (graph == null) {
+			JOptionPane.showMessageDialog(this,
+				"Select a graph from the graph list or the whole graph.\n",
+				"Warning",
+				JOptionPane.WARNING_MESSAGE);
+		} else {
+			LickGeneratorSettings settings = new LickGeneratorSettings();
+			//TODO: check for user defined settings
+			Object[][] licksScores = app.generateLicks(graph, settings);
+			
+			jTableGeneratedLicks.setModel(new javax.swing.table.DefaultTableModel(
+				licksScores,
+				new String [] {
+					"Score", "Lick"
+				}
+			));
+		}
+    }//GEN-LAST:event_jButtonGenerateLicksActionPerformed
+
+    private void jButtonBrowseGraphsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBrowseGraphsActionPerformed
+        JFileChooser c = new JFileChooser();
+        c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        c.setAcceptAllFileFilterUsed(false);
+        if (c.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            String path = c.getSelectedFile().getAbsolutePath();
+            app.setGraphsFolderPath(path);
+            jTextFieldBrowseGraphs.setText(path);
+        }
+    }//GEN-LAST:event_jButtonBrowseGraphsActionPerformed
+
+    private void jButtonCreateGraphsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateGraphsActionPerformed
+        createGraphs();
+    }//GEN-LAST:event_jButtonCreateGraphsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonBrowseGraphs;
     private javax.swing.JButton jButtonBrowseLick;
     private javax.swing.JButton jButtonClassifyLick;
     private javax.swing.JButton jButtonCreateGraphs;
     private javax.swing.JButton jButtonDisplayGraph;
+    private javax.swing.JButton jButtonGenerateLicks;
     private javax.swing.JCheckBox jCheckBoxInfluenceBending;
     private javax.swing.JCheckBox jCheckBoxInfluenceLoopNote;
     private javax.swing.JCheckBox jCheckBoxWholeGraph;
@@ -452,12 +506,15 @@ public class Frame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelBrowseLick;
     private javax.swing.JLabel jLabelGraphsList;
     private javax.swing.JList jListGraphs;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelGraphsSettings;
     private javax.swing.JPanel jPanelLickClassify;
     private javax.swing.JPanel jPanelLickGenerate;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTabbedPane jTabbedPaneLicks;
+    private javax.swing.JTable jTableGeneratedLicks;
     private javax.swing.JTable jTableGraphsScores;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextFieldBrowseGraphs;

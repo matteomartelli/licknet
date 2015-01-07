@@ -21,10 +21,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import licknet.graph.NoWeightEdgeException;
+import licknet.graph.NoteNode;
 import licknet.graph.NotesGraph;
 import licknet.graph.NotesGraphSettings;
 import licknet.lick.Lick;
 import licknet.lick.LickClassifier;
+import licknet.lick.LickGenerator;
+import licknet.lick.LickGeneratorSettings;
 import licknet.lick.LickGraphScore;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 
@@ -43,6 +49,8 @@ public class LickNetApp {
 	private String graphsFolderPath = DEFAULT_GRAPHS_FOLDER_PATH;
 	private String unknownLickFile = DEFAULT_UNKNOWN_LICK_FILE;
 	private final ArrayList<NotesGraph> notesGraphs = new ArrayList<>();
+	/* TODO: relate the best licks to each graph */
+	private ArrayList<LickGraphScore> currentBestLicks = new ArrayList<>();
 	private final NotesGraph wholeGraph = new NotesGraph("Whole");
 	private boolean useWholeGraph = false;
 	private NotesGraphSettings settings;	
@@ -132,6 +140,31 @@ public class LickNetApp {
 		
 		return graphsScores;
 	} 
+	
+	public Object[][] generateLicks(NotesGraph graph, LickGeneratorSettings settings) {
+		LickGenerator lickGenerator = new LickGenerator(graph, settings);
+		
+		try {
+			lickGenerator.generate();
+		} catch (NoWeightEdgeException ex) {
+			/* TODO: delete noweightedge from the graph */
+			Logger.getLogger(LickNetApp.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		currentBestLicks.clear();
+		currentBestLicks = lickGenerator.getBestLicks();
+		
+		Object[][] lickScores = new Object[currentBestLicks.size()][2];
+		for (int i = 0; i < currentBestLicks.size(); i++) {
+			LickGraphScore lgs = currentBestLicks.get(i);
+			lickScores[i][0] = lgs.getScore();
+			lickScores[i][1] = "";
+			for (int j = 0; j < lgs.getLick().getNotes().size(); j++) {
+				NoteNode nt = lgs.getLick().getNotes().get(j);
+				lickScores[i][1] += nt.getNodeKey() + ":o" + nt.getOctave() + " ";
+			}
+		}
+		return lickScores;
+	}
 	
 	public int getBestGraphId() {
 		return lickClassifier.getBestGraphId();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Matteo Martelli matteomartelli3@gmail.com
+ * Copyright (C) 2015 Matteo Martelli matteomartelli3@gmail.com
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,51 +17,25 @@
  */
 package licknet.lick;
 
-import licknet.graph.NotesGraph;
+import java.util.Comparator;
 
 /**
  *
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
-public class LickGraphScore {
-	private NotesGraph graph;
-	private Lick lick;
-	private float score;
-	private boolean normalized;
-	
-	public LickGraphScore(NotesGraph graph, Lick lick, float score){
-		this.normalized = false;
-		this.lick = lick;
-		this.graph = graph;
-		this.score = score;
-	}
-		
-	public void normalizeScore() {
-		if (!normalized) {
-			score /= (float)graph.getNotesSequence().size();
-			normalized = true;
-		}
-	}
-	
-	public float getScore() {
-		return score;
-	}
-
-	public void setScore(float score) {
-		this.score = score;
-		normalized = false;
-	}
-
-	public NotesGraph getGraph() {
-		return graph;
-	}
-
-	public boolean isNormalized() {
-		return normalized;
-	}
-
-	public Lick getLick() {
-		return lick;
-	}
-	
+/* Compare the score of the licks in an ArrayList for descending order sorting */
+public class LickGraphScoreComparator implements Comparator<LickGraphScore>{
+	@Override
+    public int compare(LickGraphScore lgs1, LickGraphScore lgs2) {
+    	
+		float s1 = lgs1.getScore();
+		float s2 = lgs2.getScore();
+    	
+		if (s2 > s1) 
+			return 1;
+		else if (s2 < s1)
+			return -1;
+		else
+			return 0;
+    }
 }
