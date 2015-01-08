@@ -30,7 +30,7 @@ public class LickGeneratorSettings {
 	
 	private int nRandomLicks = DEFAULT_N_RANDOM_LICKS;
 	private int nBestLicks = DEFAULT_N_BEST_LICKS;
-	private int licksMinNotes = DEFAULT_LICK_MIN_NOTES;
+	private int lickMinNotes = DEFAULT_LICK_MIN_NOTES;
 	private int lickMaxNotes = DEFAULT_LICK_MAX_NOTES;
 	private float lickDuration = DEFAULT_LICK_DURATION;
 	
@@ -53,12 +53,12 @@ public class LickGeneratorSettings {
 		this.nBestLicks = nBestLicks;
 	}
 
-	public int getLicksMinNotes() {
-		return licksMinNotes;
+	public int getLickMinNotes() {
+		return lickMinNotes;
 	}
 
-	public void setLicksMinNotes(int licksMinNotes) {
-		this.licksMinNotes = licksMinNotes;
+	public void setLickMinNotes(int lickMinNotes) {
+		this.lickMinNotes = lickMinNotes;
 	}
 
 	public int getLickMaxNotes() {

@@ -17,6 +17,8 @@
  */
 package licknet.view;
 
+import static com.sun.xml.internal.fastinfoset.alphabet.BuiltInRestrictedAlphabets.table;
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -24,11 +26,16 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import org.graphstream.ui.swingViewer.Viewer;
 
 import licknet.app.LickNetApp;
 import licknet.graph.NotesGraph;
 import licknet.graph.NotesGraphSettings;
+import licknet.lick.Lick;
 import licknet.lick.LickGeneratorSettings;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 
@@ -83,6 +90,17 @@ public class Frame extends javax.swing.JFrame {
         jButtonGenerateLicks = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTableGeneratedLicks = new javax.swing.JTable();
+        jSpinnerRandomLicksN = new javax.swing.JSpinner();
+        jLabelRandomLicksN = new javax.swing.JLabel();
+        jSpinnerBestLicksN = new javax.swing.JSpinner();
+        jLabelBestLicksN = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        jSpinnerMinNotesN = new javax.swing.JSpinner();
+        jLabelMinNotesN = new javax.swing.JLabel();
+        jSpinnerMaxNotesN = new javax.swing.JSpinner();
+        jLabelMaxNotesN = new javax.swing.JLabel();
+        jLabelLickDuration = new javax.swing.JLabel();
+        jTextFieldLickDuration = new javax.swing.JTextField();
 
         jTextField1.setText("jTextField1");
 
@@ -156,7 +174,7 @@ public class Frame extends javax.swing.JFrame {
                             .addComponent(jCheckBoxInfluenceBending)
                             .addComponent(jButtonCreateGraphs, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabelBrowseGraphs))
-                        .addGap(0, 188, Short.MAX_VALUE)))
+                        .addGap(0, 248, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanelGraphsSettingsLayout.setVerticalGroup(
@@ -244,7 +262,7 @@ public class Frame extends javax.swing.JFrame {
                         .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonBrowseLick)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(72, Short.MAX_VALUE))
                     .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
                         .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -282,19 +300,32 @@ public class Frame extends javax.swing.JFrame {
             }
         });
 
-        jTableGeneratedLicks.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "Score", "Lick"
-            }
-        ));
+        jTableGeneratedLicks.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         jTableGeneratedLicks.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jScrollPane3.setViewportView(jTableGeneratedLicks);
+
+        jSpinnerRandomLicksN.setToolTipText("Set the number of random lick that will be generated");
+        jSpinnerRandomLicksN.setValue(LickGeneratorSettings.DEFAULT_N_RANDOM_LICKS);
+
+        jLabelRandomLicksN.setText("Random Licks Number");
+
+        jSpinnerBestLicksN.setValue(LickGeneratorSettings.DEFAULT_N_BEST_LICKS);
+
+        jLabelBestLicksN.setText("Best Licks Number");
+
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        jSpinnerMinNotesN.setValue(LickGeneratorSettings.DEFAULT_LICK_MIN_NOTES);
+
+        jLabelMinNotesN.setText("Min Notes Number");
+
+        jSpinnerMaxNotesN.setValue(LickGeneratorSettings.DEFAULT_LICK_MAX_NOTES);
+
+        jLabelMaxNotesN.setText("Max Notes Number");
+
+        jLabelLickDuration.setText("Lick Duration");
+
+        jTextFieldLickDuration.setText(""+LickGeneratorSettings.DEFAULT_LICK_DURATION);
 
         javax.swing.GroupLayout jPanelLickGenerateLayout = new javax.swing.GroupLayout(jPanelLickGenerate);
         jPanelLickGenerate.setLayout(jPanelLickGenerateLayout);
@@ -303,20 +334,63 @@ public class Frame extends javax.swing.JFrame {
             .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
-                    .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
-                        .addComponent(jButtonGenerateLicks)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jScrollPane3)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelLickGenerateLayout.createSequentialGroup()
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelMinNotesN)
+                            .addComponent(jLabelMaxNotesN)
+                            .addComponent(jLabelLickDuration))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jSpinnerMaxNotesN, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSpinnerMinNotesN, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextFieldLickDuration))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
+                                .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabelRandomLicksN)
+                                    .addComponent(jLabelBestLicksN))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jSpinnerBestLicksN)
+                                    .addComponent(jSpinnerRandomLicksN, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jButtonGenerateLicks))))
                 .addContainerGap())
         );
         jPanelLickGenerateLayout.setVerticalGroup(
             jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButtonGenerateLicks)
+                .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jSpinnerMinNotesN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelMinNotesN))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jSpinnerMaxNotesN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelMaxNotesN))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabelLickDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldLickDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jSpinnerRandomLicksN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelRandomLicksN))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jSpinnerBestLicksN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelBestLicksN))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonGenerateLicks))
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(106, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(79, Short.MAX_VALUE))
         );
 
         jTabbedPaneLicks.addTab("Generate Lick", jPanelLickGenerate);
@@ -464,7 +538,22 @@ public class Frame extends javax.swing.JFrame {
 				JOptionPane.WARNING_MESSAGE);
 		} else {
 			LickGeneratorSettings settings = new LickGeneratorSettings();
-			//TODO: check for user defined settings
+			
+			settings.setnRandomLicks((int)jSpinnerRandomLicksN.getValue());
+			settings.setnBestLicks((int)jSpinnerBestLicksN.getValue());
+			settings.setLickMaxNotes((int)jSpinnerMaxNotesN.getValue());
+			settings.setLickMinNotes((int)jSpinnerMinNotesN.getValue());
+			String str = jTextFieldLickDuration.getText();
+			if (str.matches("[-+]?[0-9]*\\.?[0-9]+")) { 
+				settings.setLickDuration(Float.parseFloat(str));
+			} else {
+				JOptionPane.showMessageDialog(this,
+					"The lick duration must be a number!\n",
+					"Warning",
+					JOptionPane.WARNING_MESSAGE);
+			}
+			
+			
 			Object[][] licksScores = app.generateLicks(graph, settings);
 			
 			jTableGeneratedLicks.setModel(new javax.swing.table.DefaultTableModel(
@@ -473,6 +562,21 @@ public class Frame extends javax.swing.JFrame {
 					"Score", "Lick"
 				}
 			));
+			
+			for (int i = 0; i < jTableGeneratedLicks.getColumnCount(); i++) {
+				DefaultTableColumnModel colModel = (DefaultTableColumnModel) jTableGeneratedLicks.getColumnModel();
+				TableColumn col = colModel.getColumn(i);
+				int width = 0;
+
+				TableCellRenderer renderer = col.getHeaderRenderer();
+				for (int r = 0; r < jTableGeneratedLicks.getRowCount(); r++) {
+				  renderer = jTableGeneratedLicks.getCellRenderer(r, i);
+				  Component comp = renderer.getTableCellRendererComponent(jTableGeneratedLicks, jTableGeneratedLicks.getValueAt(r, i),
+					  false, false, r, i);
+				  width = Math.max(width, comp.getPreferredSize().width);
+				}
+				col.setPreferredWidth(width + 2);
+			  }
 		}
     }//GEN-LAST:event_jButtonGenerateLicksActionPerformed
 
@@ -502,9 +606,14 @@ public class Frame extends javax.swing.JFrame {
     private javax.swing.JCheckBox jCheckBoxInfluenceLoopNote;
     private javax.swing.JCheckBox jCheckBoxWholeGraph;
     private javax.swing.JLabel jLabelBestGraph;
+    private javax.swing.JLabel jLabelBestLicksN;
     private javax.swing.JLabel jLabelBrowseGraphs;
     private javax.swing.JLabel jLabelBrowseLick;
     private javax.swing.JLabel jLabelGraphsList;
+    private javax.swing.JLabel jLabelLickDuration;
+    private javax.swing.JLabel jLabelMaxNotesN;
+    private javax.swing.JLabel jLabelMinNotesN;
+    private javax.swing.JLabel jLabelRandomLicksN;
     private javax.swing.JList jListGraphs;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelGraphsSettings;
@@ -513,11 +622,17 @@ public class Frame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSpinner jSpinnerBestLicksN;
+    private javax.swing.JSpinner jSpinnerMaxNotesN;
+    private javax.swing.JSpinner jSpinnerMinNotesN;
+    private javax.swing.JSpinner jSpinnerRandomLicksN;
     private javax.swing.JTabbedPane jTabbedPaneLicks;
     private javax.swing.JTable jTableGeneratedLicks;
     private javax.swing.JTable jTableGraphsScores;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextFieldBrowseGraphs;
     private javax.swing.JTextField jTextFieldBrowseLick;
+    private javax.swing.JTextField jTextFieldLickDuration;
     // End of variables declaration//GEN-END:variables
 }

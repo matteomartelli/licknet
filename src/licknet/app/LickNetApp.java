@@ -17,7 +17,10 @@
  */
 package licknet.app;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -27,12 +30,23 @@ import licknet.graph.NoWeightEdgeException;
 import licknet.graph.NoteNode;
 import licknet.graph.NotesGraph;
 import licknet.graph.NotesGraphSettings;
+import licknet.io.SongFileLoader;
 import licknet.lick.Lick;
 import licknet.lick.LickClassifier;
 import licknet.lick.LickGenerator;
 import licknet.lick.LickGeneratorSettings;
 import licknet.lick.LickGraphScore;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
+import org.herac.tuxguitar.io.tg.TGOutputStream;
+import org.herac.tuxguitar.song.factory.TGFactory;
+import org.herac.tuxguitar.song.models.TGBeat;
+import org.herac.tuxguitar.song.models.TGDuration;
+import org.herac.tuxguitar.song.models.TGMeasure;
+import org.herac.tuxguitar.song.models.TGMeasureHeader;
+import org.herac.tuxguitar.song.models.TGNote;
+import org.herac.tuxguitar.song.models.TGSong;
+import org.herac.tuxguitar.song.models.TGTrack;
+import org.herac.tuxguitar.song.models.TGVoice;
 
 /**
  *
@@ -164,6 +178,10 @@ public class LickNetApp {
 			}
 		}
 		return lickScores;
+	}
+	
+	public ArrayList<LickGraphScore> getCurrentBestLicks() {
+		return currentBestLicks;
 	}
 	
 	public int getBestGraphId() {
