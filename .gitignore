@@ -19,9 +19,9 @@ build
 .classpath
 manifest.mf
 dist
-nbproject/project.xml
-nbproject/genfiles.properties
-nbproject/private
+#nbproject/project.xml
+#nbproject/genfiles.properties
+#nbproject/private
 
 #Tex compile files
 report/*.log
