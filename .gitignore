@@ -27,5 +27,6 @@ report/*.aux
 report/*.out
 report/*.sty
 
-#Vim swap files 
+ 
 *.swp
+*.sh
