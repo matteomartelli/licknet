@@ -40,7 +40,7 @@ import org.herac.tuxguitar.io.base.TGFileFormatException;
 public class LickNetApp {
 	private static LickNetApp instance = null;
 	
-	private final String DEFAULT_DATA_FOLDER = "data";
+	private final String DEFAULT_DATA_FOLDER = "example_data";
 	private final String DEFAULT_GRAPHS_FOLDER_PATH = DEFAULT_DATA_FOLDER + "/tracks";
 	private final String DEFAULT_UNKNOWN_LICK_FILE = DEFAULT_DATA_FOLDER + "/licks/unknown_lick.tg";
 	
