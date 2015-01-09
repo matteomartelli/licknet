@@ -162,34 +162,34 @@ public class Frame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelGraphsSettingsLayout.createSequentialGroup()
-                        .addComponent(jTextFieldBrowseGraphs)
+                        .addComponent(jTextFieldBrowseGraphs, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonBrowseGraphs))
+                        .addComponent(jButtonBrowseGraphs)
+                        .addGap(125, 125, 125))
                     .addGroup(jPanelGraphsSettingsLayout.createSequentialGroup()
                         .addGroup(jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jCheckBoxInfluenceLoopNote)
-                            .addComponent(jCheckBoxInfluenceBending)
                             .addComponent(jButtonCreateGraphs, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelBrowseGraphs))
-                        .addGap(0, 248, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(jLabelBrowseGraphs)
+                            .addComponent(jCheckBoxInfluenceBending))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanelGraphsSettingsLayout.setVerticalGroup(
             jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelGraphsSettingsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabelBrowseGraphs)
-                .addGap(3, 3, 3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelGraphsSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldBrowseGraphs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonBrowseGraphs))
-                .addGap(28, 28, 28)
+                .addGap(26, 26, 26)
                 .addComponent(jCheckBoxInfluenceBending)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jCheckBoxInfluenceLoopNote)
                 .addGap(52, 52, 52)
                 .addComponent(jButtonCreateGraphs)
-                .addContainerGap(228, Short.MAX_VALUE))
+                .addContainerGap(227, Short.MAX_VALUE))
         );
 
         jTabbedPaneLicks.addTab("Graphs Settings", jPanelGraphsSettings);
@@ -215,38 +215,17 @@ public class Frame extends javax.swing.JFrame {
 
         jTableGraphsScores.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null},
-                {null, null}
+                {},
+                {},
+                {},
+                {}
             },
             new String [] {
-                "Graph", "Score"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Float.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false
-            };
 
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
             }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
+        ));
         jTableGraphsScores.getTableHeader().setReorderingAllowed(false);
         jScrollPane2.setViewportView(jTableGraphsScores);
-        if (jTableGraphsScores.getColumnModel().getColumnCount() > 0) {
-            jTableGraphsScores.getColumnModel().getColumn(0).setResizable(false);
-            jTableGraphsScores.getColumnModel().getColumn(0).setHeaderValue("Graph");
-            jTableGraphsScores.getColumnModel().getColumn(1).setResizable(false);
-            jTableGraphsScores.getColumnModel().getColumn(1).setHeaderValue("Score");
-        }
 
         javax.swing.GroupLayout jPanelLickClassifyLayout = new javax.swing.GroupLayout(jPanelLickClassify);
         jPanelLickClassify.setLayout(jPanelLickClassifyLayout);
@@ -256,19 +235,23 @@ public class Frame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
-                        .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonBrowseLick)
-                        .addContainerGap(72, Short.MAX_VALUE))
+                        .addComponent(jLabelBrowseLick)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
                         .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
-                                .addComponent(jButtonClassifyLick)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabelBestGraph))
-                            .addComponent(jLabelBrowseLick))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                                .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
+                                        .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButtonBrowseLick))
+                                    .addGroup(jPanelLickClassifyLayout.createSequentialGroup()
+                                        .addComponent(jButtonClassifyLick)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabelBestGraph)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 538, Short.MAX_VALUE))
+                        .addContainerGap())))
         );
         jPanelLickClassifyLayout.setVerticalGroup(
             jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -276,16 +259,16 @@ public class Frame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabelBrowseLick)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButtonBrowseLick)
-                    .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldBrowseLick, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonBrowseLick))
+                .addGap(19, 19, 19)
                 .addGroup(jPanelLickClassifyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonClassifyLick)
                     .addComponent(jLabelBestGraph))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(111, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         jTabbedPaneLicks.addTab("Classify Lick", jPanelLickClassify);
@@ -297,6 +280,14 @@ public class Frame extends javax.swing.JFrame {
             }
         });
 
+        jTableGeneratedLicks.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
         jTableGeneratedLicks.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         jTableGeneratedLicks.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jScrollPane3.setViewportView(jTableGeneratedLicks);
@@ -332,16 +323,16 @@ public class Frame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelLickGenerateLayout.createSequentialGroup()
+                    .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
                         .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabelMinNotesN)
                             .addComponent(jLabelMaxNotesN)
                             .addComponent(jLabelLickDuration))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jSpinnerMaxNotesN, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jSpinnerMinNotesN, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldLickDuration))
+                            .addComponent(jTextFieldLickDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -354,7 +345,8 @@ public class Frame extends javax.swing.JFrame {
                                 .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(jSpinnerBestLicksN)
                                     .addComponent(jSpinnerRandomLicksN, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jButtonGenerateLicks))))
+                            .addComponent(jButtonGenerateLicks))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanelLickGenerateLayout.setVerticalGroup(
@@ -363,17 +355,17 @@ public class Frame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
-                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jSpinnerMinNotesN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelMinNotesN))
+                        .addComponent(jLabelMinNotesN)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jSpinnerMaxNotesN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelMaxNotesN))
+                        .addComponent(jLabelMaxNotesN)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabelLickDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextFieldLickDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabelLickDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
+                        .addComponent(jSpinnerMinNotesN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSpinnerMaxNotesN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldLickDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanelLickGenerateLayout.createSequentialGroup()
                         .addGroup(jPanelLickGenerateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jSpinnerRandomLicksN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -385,9 +377,9 @@ public class Frame extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButtonGenerateLicks))
                     .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(79, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(54, 54, 54))
         );
 
         jTabbedPaneLicks.addTab("Generate Lick", jPanelLickGenerate);
