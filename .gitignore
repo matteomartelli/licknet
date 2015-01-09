@@ -20,7 +20,7 @@ build
 dist
 #nbproject/project.xml
 #nbproject/genfiles.properties
-#nbproject/private
+nbproject/private
 #manifest.mf
 
 #Tex compile files
