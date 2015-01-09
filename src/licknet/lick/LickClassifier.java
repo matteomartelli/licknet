@@ -33,7 +33,7 @@ public class LickClassifier {
 
 	private final ArrayList<LickGraphScore> graphs;
 	private int bestGraphId;
-	private Lick lick;
+	private final Lick lick;
 	
 	public LickClassifier(ArrayList<NotesGraph> graphs, Lick lick) {
 		this.graphs = new ArrayList<LickGraphScore>();

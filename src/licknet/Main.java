@@ -17,9 +17,11 @@
  */
 package licknet;
 
-import licknet.graph.NotesGraph;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import licknet.view.Frame;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
@@ -29,32 +31,18 @@ import javax.swing.UIManager;
 public class Main {
 	
 	/**
-	 * @param args the command line arguments
-	 * @throws Exception 
+	 * @param args the command line arguments 
 	 */
-	public static void main(String[] args) 
-			throws Exception {
+	public static void main(String[] args) {
 		
-		NotesGraph graph = new NotesGraph("licknet");
-
-		/*String filePath = "data/hendrix/Jimi Hendrix - Foxy Lady.tg";
-		
-		graph.initFromFile(filePath);*/
-	
-		/*graph.initFromFolder("data/jimi hendrix");
-		
-		for (Node node : graph.getEachNode())
-			node.addAttribute("ui.label", node.getId());
-		
-		Log.printNotesSequence(graph.getNotesSequence());
-		
-		graph.findLicks();
-		
-		Log.printLicks(graph.getLicks());
-
-		graph.display();
-		*/
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | 
+				InstantiationException | 
+				IllegalAccessException | 
+				UnsupportedLookAndFeelException ex) {
+			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+		}
 		
 		new Frame().setVisible(true);
 	}

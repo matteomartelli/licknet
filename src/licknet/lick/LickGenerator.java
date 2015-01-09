@@ -36,8 +36,8 @@ public class LickGenerator {
 	private LickGeneratorSettings settings;
 	
 	private final NotesGraph graph;
-	private ArrayList<LickGraphScore> randomLicks;
-	private ArrayList<LickGraphScore> bestLicks;
+	private final ArrayList<LickGraphScore> randomLicks;
+	private final ArrayList<LickGraphScore> bestLicks;
 	
 	
 	public LickGenerator(NotesGraph graph, LickGeneratorSettings settings) {

@@ -20,11 +20,8 @@ package licknet.graph;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import licknet.io.SongFileLoader;
 import licknet.utils.Consts;
-import licknet.utils.Log;
 import licknet.lick.Lick;
 
 import org.graphstream.graph.*;
@@ -45,12 +42,10 @@ public class NotesGraph extends SingleGraph {
 	
 	/* TODO: this should be freed, too much memory needed */
 	private final ArrayList<NoteNode> notesSequence;  
-	private final ArrayList<Lick> licks;
 	
 	public NotesGraph(String id) {
 		super(id);
 		this.notesSequence = new ArrayList<NoteNode>();
-		this.licks = new ArrayList<Lick>();
 	}
 	
 	public void initFromFile(String filePath) throws Exception {
@@ -333,145 +328,7 @@ public class NotesGraph extends SingleGraph {
 	@Override
 	public void clear() {
 		notesSequence.clear();
-		licks.clear();
 		super.clear();
-	}
-	
-	/* TODO: addEdge(..., int[] ojumps)*/
-	
-	/* If the graph is empty this silently do nothing.
-	 * WARNING: This will erase the previous array of licks */
-	public void findLicks() {
-		licks.clear();
-		
-		ArrayList<Node> startingNodes;
-		Node snode;
-		int nStartNodes = settings.getnStartNodes();
-		startingNodes = new ArrayList<Node>();
-		
-		if (this.nodeCount == 0)
-			return;
-		
-		/* TODO: this can be done copying the array of notes from the graph
-		 * if there is a way to get it */
-		for (Node node : this.getEachNode()) {
-			startingNodes.add(node);
-		}
-		
-		Collections.sort(startingNodes, new DegreeComparator());
-		
-		if (startingNodes.size() < nStartNodes)
-			nStartNodes = startingNodes.size();
-		
-		/* Make a copy of the edges */
-		for (Edge e : this.getEachEdge()) {
-			int[] ojumpsOld = e.getAttribute("ojumps");
-			int[] ojumpsBak = new int[ojumpsOld.length];
-			System.arraycopy(ojumpsOld, 0, ojumpsBak, 0, ojumpsOld.length);
-					
-			e.addAttribute("ojumpsBak", ojumpsBak);
-		}
-				
-		snode = (Node)startingNodes.get(0);
-		/* For each node of the greatest degree set perform a visit 
-		 * starting from that node */
-		for (int i = 0; i < nStartNodes && snode != null; i++) {
-			snode = (Node)startingNodes.get(i);
-							
-			System.out.println("lickvisit "+ i +" start");
-			//NoteNode fstNode = lick.getNotes().get(0);
-			//ArrayList<Integer> startIndexes = getStartIndexes(fstNode.getNodeKey());
-			
-			ArrayList<Lick> visitedLicks = lickVisit(snode);
-			/* Check if any note of the found lick is in the notesSequence */
-			for (Lick lick : visitedLicks) {
-				/* Brute force match search */
-				int size = (notesSequence.size() - lick.getNotes().size());
-				for (int si = 0; si < size; si++) {
-					if (matchLick(lick, si) > settings.getMinMatchRate())
-						lick.incrementOccurrences();
-				}
-				
-				if (lick.getOccurrences() > 0 && 
-						lick.getNotes().size() >= settings.getLicksMinNotes())
-					licks.add(lick);
-				
-				System.out.println(visitedLicks.indexOf(lick) + " ");/*FIXME: WTF? */
-				Log.printLick(lick); 
-			}
-			
-		}
-	}	
-	
-	private void search(Node cnode, Lick lick, ArrayList<Lick> flicks) {
-		Collection<Edge> leavingEdges = cnode.getLeavingEdgeSet();
-					
-		/* Add the current node to the the current lick. */
-		NoteNode cnote = (NoteNode)cnode.getAttribute("note");
-		NoteNode prevNote = lick.getNotes().size() == 0 ? null :
-			lick.getNotes().get(lick.getNotes().size() - 1);
-		
-//		if (settings.isInfluenceLoopNote() || prevNote == null
-//				|| !cnote.getNodeKey().equals(prevNote.getNodeKey())) {		
-//			lick.addNote(cnote);
-//			lick.addDuration(cnote.getTime());
-//			//Log.printLick(lick);
-//		}
-		
-		int zeroW;
-		for (zeroW = 0; zeroW < leavingEdges.size(); zeroW++) {
-			WeightEdge ledge = new WeightEdge(cnode.getLeavingEdge(zeroW));
-			if (ledge.getMaxOctaveJump() > 0)
-				break;
-		}
-		
-		if (zeroW >= leavingEdges.size() - 1 ||
-				cnode.getOutDegree() == 0 || 
-				lick.getDuration() >= settings.getLickDuration() ||
-				lick.getNotes().size() >= settings.getLickMaxNotes()) {
-			/* This path search is finished, add the lick to the licks set 
-			 * and restore the initial status of the graph. */
-			flicks.add(lick);
-			//System.out.println("lick added");
-			return;
-		}
-		
-		/* Copy all the leaving edges of the current node and sort them 
-		 * in their weight descending order. */
-		ArrayList<Edge> lvEdges = new ArrayList<Edge>();
-		lvEdges.addAll(leavingEdges);
-		Collections.sort(lvEdges, new WeightComparator());
-		int branching = settings.getLickBranching() <= lvEdges.size()?
-				settings.getLickBranching() : lvEdges.size();
-		
-		/* For each neighbour of the current node create a new lick starting 
-		 * a new path visit */
-		Lick branchLick = branching > 1 ? new Lick(lick) : null; /* Store the lick before going ahead */
-		
-		for (int i = 0; i < branching; i++) {
-			WeightEdge ledge = new WeightEdge(getEdge(lvEdges.get(i).getId()));
-			if (ledge.getMaxOctaveJump() == 0)
-				continue;
-			
-			ledge.decreaseMaxOctaveJump(); /* Decrease the visited octave weight */
-			
-			Node neighbour = ledge.getEdge().getTargetNode();
-			if (i == 0)
-				search(neighbour, lick, flicks); /* Best edge neighbour */
-			else
-				search(neighbour, branchLick, flicks);
-			
-			ledge.resetWeights(); /* FIXME: some problem with hendix and loopnote avoidance */
-		}
-	}
-	
-	private ArrayList<Lick> lickVisit(Node snode) {
-		ArrayList<Lick> foundLicks = new ArrayList<Lick>();
-		Lick slick = new Lick();
-		/* Perform a N path recursive search */
-		search(snode, slick, foundLicks);
-		
-		return foundLicks;
 	}
 	
 	public Edge getEdge(String Ak, String Bk) {
@@ -484,10 +341,6 @@ public class NotesGraph extends SingleGraph {
 	
 	public ArrayList<NoteNode> getNotesSequence() {
 		return notesSequence;
-	}
-
-	public ArrayList<Lick> getLicks() {
-		return licks;
 	}
 	
 	public int getMaxWeight() {

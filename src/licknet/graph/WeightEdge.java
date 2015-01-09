@@ -1,6 +1,5 @@
 package licknet.graph;
 
-import java.util.Arrays;
 import java.util.Random;
 import licknet.utils.Consts;
 
@@ -12,7 +11,6 @@ public class WeightEdge {
 	public WeightEdge(Edge edge) {
 		this.edge = edge;
 	}
-	
 	
     /* Find the max octave jump for an edge. 
 	 * Return the id of the maximum 
@@ -35,20 +33,7 @@ public class WeightEdge {
 		int[] ojumps = edge.getAttribute("ojumps");
 		return ojumps[getMaxOctaveJumpId()];
 	}
-	
-	public void decreaseMaxOctaveJump() {
-		int[] ojumps = edge.getAttribute("ojumps");
-		int maxId = getMaxOctaveJumpId();
-		ojumps[maxId]--;
-	}
-	
-	public void resetWeights() {
-		int[] ojumpsBak = edge.getAttribute("ojumpsBak");
-		int[] ojumps = edge.getAttribute("ojumps");
-		
-		System.arraycopy(ojumpsBak, 0, ojumps, 0, ojumpsBak.length);
-	}
-	
+			
 	/* Return the weight corresponding to the given octave jump */
 	public int getWeight(int octaveJump){
 		int[] ojumps = edge.getAttribute("ojumps");

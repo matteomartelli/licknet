@@ -20,7 +20,6 @@ package licknet.graph;
 import java.util.Comparator;
 
 import org.graphstream.graph.Edge;
-import org.graphstream.graph.implementations.AbstractEdge;
 
 /**
 *

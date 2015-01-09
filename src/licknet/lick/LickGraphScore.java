@@ -24,8 +24,8 @@ import licknet.graph.NotesGraph;
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
 public class LickGraphScore {
-	private NotesGraph graph;
-	private Lick lick;
+	private final NotesGraph graph;
+	private final Lick lick;
 	private float score;
 	private boolean normalized;
 	

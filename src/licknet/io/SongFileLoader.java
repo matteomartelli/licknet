@@ -19,9 +19,7 @@ package licknet.io;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import javax.activation.UnsupportedDataTypeException;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 import org.herac.tuxguitar.io.gpx.GPXInputStream;
 import org.herac.tuxguitar.io.gtp.GP3InputStream;
