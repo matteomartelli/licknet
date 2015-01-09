@@ -18,10 +18,7 @@ build
 .project
 .classpath
 dist
-#nbproject/project.xml
-#nbproject/genfiles.properties
-nbproject/private
-#manifest.mf
+manifest.mf
 
 #Tex compile files
 report/*.log
@@ -29,3 +26,6 @@ report/*.fdb_latexmk
 report/*.aux
 report/*.out
 report/*.sty
+
+#Vim swap files 
+*.swp
