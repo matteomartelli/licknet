@@ -31,6 +31,12 @@ import licknet.lick.LickClassifier;
 import licknet.lick.LickGenerator;
 import licknet.lick.LickGeneratorSettings;
 import licknet.lick.LickGraphScore;
+import org.graphstream.algorithm.Dijkstra;
+import org.graphstream.algorithm.Toolkit;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.SingleGraph;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 
 /**
@@ -163,6 +169,59 @@ public class LickNetApp {
 			}
 		}
 		return lickScores;
+	}
+	
+	public Graph getRandomEquivalent(Graph graph) {
+		Graph g = new SingleGraph(graph.getId() + "_random");
+		
+		for (Node n : graph)
+			g.addNode(n.getId());
+		
+		for (int i = 0; i < graph.getEdgeCount(); i++) {
+			Node A = Toolkit.randomNode(g);
+			Node B = Toolkit.randomNode(g);
+			String Ek = A.getId()+B.getId();
+			String REk = B.getId()+A.getId();
+			if (g.getEdge(Ek) == null && g.getEdge(REk) == null)
+				g.addEdge(A.getId()+B.getId(), A, B);
+		}
+		return g;
+	}
+	
+	public double getShortestPathLenghtAvg(Graph graph) {
+		Graph g = new SingleGraph(graph.getId() + "_dijkstra");
+		for (Node n : graph) {
+			String Ak = n.getId();
+			if (g.getNode(Ak) == null)
+				g.addNode(Ak);
+			for (Edge e : n.getEachLeavingEdge()) {
+				String Bk = e.getTargetNode().getId();
+				String Ek = Ak + Bk;
+				String REk = Bk + Ak;
+				if ( g.getEdge(Ek) == null && g.getEdge(REk) == null) {
+					if (g.getNode(Bk) == null)
+						g.addNode(Bk);
+					g.addEdge(Ek, Ak, Bk).addAttribute("length", 1);
+				}
+			}
+		}
+		double sum = 0.0;
+		
+		for (Node i : g) {
+			Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, null, "length");
+			// Compute the shortest paths in g from A to all nodes
+			dijkstra.init(g);
+			dijkstra.setSource(i);
+			
+			dijkstra.compute();
+			for (Node j : g) {
+				if (i.getId() != j.getId()) 
+					sum += dijkstra.getPathLength(j); //dij
+			}
+		}
+		double N = (double)(g.getNodeSet().size());
+		double L = sum / (N * (N - 1.0));
+		return L;
 	}
 	
 	public ArrayList<LickGraphScore> getCurrentBestLicks() {

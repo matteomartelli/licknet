@@ -45,13 +45,21 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" attributes="0">
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="jScrollPane1" pref="0" max="32767" attributes="0"/>
-                          <Component id="jButtonDisplayGraph" alignment="0" max="32767" attributes="0"/>
-                          <Component id="jCheckBoxWholeGraph" alignment="0" pref="188" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="jScrollPane1" pref="0" max="32767" attributes="0"/>
+                              <Component id="jButtonDisplayGraph" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jCheckBoxWholeGraph" alignment="0" pref="188" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="jLabelGraphsList" min="-2" pref="188" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="jLabelGraphsList" min="-2" pref="188" max="-2" attributes="0"/>
+                      <Component id="jLabelVCardinality" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelECardinality" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelClustAvg" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelClustAvgRnd" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelShortestPathLenghtAvgRnd" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelShortestPathLenghtAvg" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="jTabbedPaneLicks" max="32767" attributes="0"/>
@@ -75,7 +83,19 @@
                           <Component id="jCheckBoxWholeGraph" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="jButtonDisplayGraph" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="178" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="jLabelVCardinality" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabelECardinality" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabelClustAvg" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabelClustAvgRnd" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabelShortestPathLenghtAvg" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabelShortestPathLenghtAvgRnd" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -547,6 +567,48 @@
             </Container>
           </SubComponents>
         </Container>
+        <Component class="javax.swing.JLabel" name="jLabelVCardinality">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="GPROP_VCARDINALITY_TEXT" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabelECardinality">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="GPROP_ECARDINALITY_TEXT" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabelClustAvg">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="GPROP_CLUSTAVG_TEXT" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabelShortestPathLenghtAvg">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="GPROP_SHORTESTPATHAVG_TEXT" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabelClustAvgRnd">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="GPROP_CLUSTAVGRND_TEXT" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabelShortestPathLenghtAvgRnd">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="GPROP_SHORTESTPATHAVGRND_TEXT" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
       </SubComponents>
     </Container>
   </SubComponents>

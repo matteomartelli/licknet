@@ -215,7 +215,7 @@ public class NotesGraph extends SingleGraph {
 							settings.isInfluenceBendings());
 					
 					/* Skip the repeated notes if specified in the settings */
-					if (prevNt != null && settings.isInfluenceLoopNote() && 
+					if (prevNt != null && !settings.isInfluenceLoopNote() && 
 							nt.getNodeKey().equals(prevNt.getNodeKey()))
 						continue;
 

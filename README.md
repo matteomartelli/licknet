@@ -5,7 +5,7 @@ LickNet is a tool for building and analyzing networks of guitar licks and solos.
 
 ##Dependencies
 ###Graphstream 
-The core library (>= 1.2) must be [downloaded](http://graphstream-project.org/download/) and put in the *lib* directory. 
+The core and algo libraries (>= 1.2) must be [downloaded](http://graphstream-project.org/download/) and put in the *lib* directory. 
 
 ###Tuxguitar
 The version needed is >= 1.3 (current version) and unfortunately there are no ready jar lib files for the current version, thus the source from the [sourcefourge repository](http://sourceforge.net/projects/tuxguitar/) must be downloaded and re-build. To re-build it, once you have checked out a svn working copy, go into

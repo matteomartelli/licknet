@@ -25,6 +25,9 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -34,6 +37,11 @@ import licknet.app.LickNetApp;
 import licknet.graph.NotesGraph;
 import licknet.graph.NotesGraphSettings;
 import licknet.lick.LickGeneratorSettings;
+import org.graphstream.algorithm.Toolkit;
+import org.graphstream.graph.Graph;
+import org.graphstream.stream.file.FileSink;
+import org.graphstream.stream.file.FileSinkGraphML;
+import org.graphstream.stream.file.FileSourceGraphML;
 import org.herac.tuxguitar.io.base.TGFileFormatException;
 
 /**
@@ -41,14 +49,48 @@ import org.herac.tuxguitar.io.base.TGFileFormatException;
  * @author Matteo Martelli matteomartelli3@gmail.com
  */
 public class Frame extends javax.swing.JFrame {
-	static LickNetApp app = LickNetApp.getInstance();
 	
+	
+	
+	class SharedListSelectionHandler implements ListSelectionListener {
+		//FIXME: triggered two times for each selction
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+			
+			if (!lsm.isSelectionEmpty() && !(e.getValueIsAdjusting())) {
+				// Find out which indexes are selected.
+				int minIndex = lsm.getMinSelectionIndex();
+				int maxIndex = lsm.getMaxSelectionIndex();
+				for (int i = minIndex; i <= maxIndex; i++) {
+					if (lsm.isSelectedIndex(i)) {
+						NotesGraph graph = getSelectedGraph();
+						drawGraphProperties(graph);
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	private static final String GPROP_VCARDINALITY_TEXT = "Vertex Cardinality: ";
+	private static final String GPROP_ECARDINALITY_TEXT = "Edges Cardinality: ";
+	private static final String GPROP_CLUSTAVG_TEXT = "Clustering AVG: ";
+	private static final String GPROP_SHORTESTPATHAVG_TEXT = "Path Length AVG : ";
+	private static final String GPROP_CLUSTAVGRND_TEXT = "Rand Clustering AVG: ";
+	private static final String GPROP_SHORTESTPATHAVGRND_TEXT = "Rand Path Length AVG : ";
+
+	private static LickNetApp app = LickNetApp.getInstance();
+
 	/**
 	 * Creates new form Frame
 	 */
 	public Frame() {
 		setTitle("Licknet");
 		initComponents();
+		ListSelectionModel listSelectionModel = jListGraphs.getSelectionModel();
+		listSelectionModel.addListSelectionListener(
+                            new SharedListSelectionHandler());
 	}
 
 	/**
@@ -98,6 +140,12 @@ public class Frame extends javax.swing.JFrame {
         jLabelMaxNotesN = new javax.swing.JLabel();
         jLabelLickDuration = new javax.swing.JLabel();
         jTextFieldLickDuration = new javax.swing.JTextField();
+        jLabelVCardinality = new javax.swing.JLabel();
+        jLabelECardinality = new javax.swing.JLabel();
+        jLabelClustAvg = new javax.swing.JLabel();
+        jLabelShortestPathLenghtAvg = new javax.swing.JLabel();
+        jLabelClustAvgRnd = new javax.swing.JLabel();
+        jLabelShortestPathLenghtAvgRnd = new javax.swing.JLabel();
 
         jTextField1.setText("jTextField1");
 
@@ -381,18 +429,37 @@ public class Frame extends javax.swing.JFrame {
 
         jTabbedPaneLicks.addTab("Generate Lick", jPanelLickGenerate);
 
+        jLabelVCardinality.setText(GPROP_VCARDINALITY_TEXT);
+
+        jLabelECardinality.setText(GPROP_ECARDINALITY_TEXT);
+
+        jLabelClustAvg.setText(GPROP_CLUSTAVG_TEXT);
+
+        jLabelShortestPathLenghtAvg.setText(GPROP_SHORTESTPATHAVG_TEXT);
+
+        jLabelClustAvgRnd.setText(GPROP_CLUSTAVGRND_TEXT);
+
+        jLabelShortestPathLenghtAvgRnd.setText(GPROP_SHORTESTPATHAVGRND_TEXT);
+
         javax.swing.GroupLayout jPanelMainLayout = new javax.swing.GroupLayout(jPanelMain);
         jPanelMain.setLayout(jPanelMainLayout);
         jPanelMainLayout.setHorizontalGroup(
             jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelMainLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addComponent(jButtonDisplayGraph, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jCheckBoxWholeGraph, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE))
-                    .addComponent(jLabelGraphsList, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(jPanelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(jButtonDisplayGraph, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jCheckBoxWholeGraph, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE))
+                        .addComponent(jLabelGraphsList, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabelVCardinality)
+                    .addComponent(jLabelECardinality)
+                    .addComponent(jLabelClustAvg)
+                    .addComponent(jLabelClustAvgRnd)
+                    .addComponent(jLabelShortestPathLenghtAvgRnd)
+                    .addComponent(jLabelShortestPathLenghtAvg))
                 .addGap(18, 18, 18)
                 .addComponent(jTabbedPaneLicks))
         );
@@ -412,7 +479,19 @@ public class Frame extends javax.swing.JFrame {
                         .addComponent(jCheckBoxWholeGraph)
                         .addGap(18, 18, 18)
                         .addComponent(jButtonDisplayGraph)
-                        .addGap(178, 178, 178))))
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabelVCardinality)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelECardinality)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelClustAvg)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelClustAvgRnd)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelShortestPathLenghtAvg)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelShortestPathLenghtAvgRnd)
+                        .addGap(40, 40, 40))))
         );
 
         getContentPane().add(jPanelMain, java.awt.BorderLayout.PAGE_START);
@@ -465,6 +544,7 @@ public class Frame extends javax.swing.JFrame {
 				"Warning",
 				JOptionPane.WARNING_MESSAGE);
 		} else {
+			
 			Viewer viewer = graph.display();
 			viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
 		}
@@ -483,9 +563,11 @@ public class Frame extends javax.swing.JFrame {
       	if (evt.getStateChange() == ItemEvent.SELECTED) {
 			jListGraphs.setEnabled(false);
 			app.setUseWholeGraph(true);
+			drawGraphProperties(app.getWholeGraph());
 		} else {
 			jListGraphs.setEnabled(true);
 			app.setUseWholeGraph(false);
+			resetGraphProperies();
 		}
     }//GEN-LAST:event_jCheckBoxWholeGraphItemStateChanged
 
@@ -579,8 +661,43 @@ public class Frame extends javax.swing.JFrame {
 
     private void jButtonCreateGraphsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateGraphsActionPerformed
         createGraphs();
+		resetGraphProperies();
+		
     }//GEN-LAST:event_jButtonCreateGraphsActionPerformed
 
+	public void drawGraphProperties(NotesGraph graph){
+		jLabelVCardinality.setText(GPROP_VCARDINALITY_TEXT + 
+				graph.getNodeSet().size());
+		jLabelECardinality.setText(GPROP_ECARDINALITY_TEXT + 
+				graph.getEdgeSet().size());
+		
+		jLabelClustAvg.setText(GPROP_CLUSTAVG_TEXT + 
+				String.format("%.3f", Toolkit.averageClusteringCoefficient(graph)));
+		
+		jLabelShortestPathLenghtAvg.setText(GPROP_SHORTESTPATHAVG_TEXT + 
+				String.format("%.3f", app.getShortestPathLenghtAvg(graph)));
+		
+		Graph rand = app.getRandomEquivalent(graph);
+		
+		jLabelClustAvgRnd.setText(GPROP_CLUSTAVGRND_TEXT + 
+				String.format("%.3f", Toolkit.averageClusteringCoefficient(rand)));
+		
+		jLabelShortestPathLenghtAvgRnd.setText(GPROP_SHORTESTPATHAVGRND_TEXT + 
+				String.format("%.3f", app.getShortestPathLenghtAvg(rand)));
+		
+	}
+	
+	public void resetGraphProperies(){
+		jLabelVCardinality.setText(GPROP_VCARDINALITY_TEXT);
+		jLabelECardinality.setText(GPROP_ECARDINALITY_TEXT);
+		jLabelClustAvg.setText(GPROP_CLUSTAVG_TEXT);
+		jLabelShortestPathLenghtAvg.setText(GPROP_CLUSTAVG_TEXT);
+		jLabelClustAvgRnd.setText(GPROP_CLUSTAVGRND_TEXT);
+		jLabelShortestPathLenghtAvgRnd.setText(GPROP_SHORTESTPATHAVGRND_TEXT);
+		if (app.isUseWholeGraph())
+			drawGraphProperties(app.getWholeGraph());
+	}
+	
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonBrowseGraphs;
     private javax.swing.JButton jButtonBrowseLick;
@@ -595,11 +712,17 @@ public class Frame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelBestLicksN;
     private javax.swing.JLabel jLabelBrowseGraphs;
     private javax.swing.JLabel jLabelBrowseLick;
+    private javax.swing.JLabel jLabelClustAvg;
+    private javax.swing.JLabel jLabelClustAvgRnd;
+    private javax.swing.JLabel jLabelECardinality;
     private javax.swing.JLabel jLabelGraphsList;
     private javax.swing.JLabel jLabelLickDuration;
     private javax.swing.JLabel jLabelMaxNotesN;
     private javax.swing.JLabel jLabelMinNotesN;
     private javax.swing.JLabel jLabelRandomLicksN;
+    private javax.swing.JLabel jLabelShortestPathLenghtAvg;
+    private javax.swing.JLabel jLabelShortestPathLenghtAvgRnd;
+    private javax.swing.JLabel jLabelVCardinality;
     private javax.swing.JList jListGraphs;
     private javax.swing.JPanel jPanelGraphsSettings;
     private javax.swing.JPanel jPanelLickClassify;
