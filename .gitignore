@@ -31,3 +31,4 @@ report/*.sty
 *.swp
 *.sh
 *.wav
+*.dvi
