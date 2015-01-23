@@ -39,6 +39,8 @@ import licknet.graph.NotesGraphSettings;
 import licknet.lick.LickGeneratorSettings;
 import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.Graph;
+import org.graphstream.stream.Sink;
+import org.graphstream.stream.Source;
 import org.graphstream.stream.file.FileSink;
 import org.graphstream.stream.file.FileSinkGraphML;
 import org.graphstream.stream.file.FileSourceGraphML;
@@ -564,6 +566,12 @@ public class Frame extends javax.swing.JFrame {
 			jListGraphs.setEnabled(false);
 			app.setUseWholeGraph(true);
 			drawGraphProperties(app.getWholeGraph());
+			/*FileSinkGraphML s = new FileSinkGraphML();
+			  try {
+				  s.writeAll(app.getWholeGraph(), "/home/butchertkd/graph.xml");
+			  } catch (IOException ex) {
+				  Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
+			  }*/
 		} else {
 			jListGraphs.setEnabled(true);
 			app.setUseWholeGraph(false);
