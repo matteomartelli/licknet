@@ -25,18 +25,34 @@
 \maketitle
 
 \begin{abstract}
+The purpose of the project described in this document is to provide a
+method to analyse the relations between musical notes patterns 
+in guitar solos.
+Given the large amount of guitar solos data available in the Web, it has been possible to
+ develop a procedure able to generate a network of guitar solos.
+An empirical study has been then conduced in
+order to identify some well known characteristic of the generated
+networks, turning out that the latter seem to satisfy the small world
+property\cite{sw-watts}. Moreover, with the intent to provide an application
+for the generated networks, two interesting tools have been developed:
+a Licks Classifier, useful to identify at which artist a set of
+guitar licks belongs to, and a Licks Generator, useful to create new
+licks of a particular guitarist. Despite their ease, these two feature
+seem to result very effective.
 \end{abstract}
 \section{Introduction}
 Musicians are often intrigued on how other musicians compose or
-improvise their music and if there are some relations with their
-previous composed music or with the compositions of other musicians.
+improvise their music. A musician also, may often guess if there are some 
+relations between its
+music and the compositions of other musicians.
 Even non expert music enthusiasts often wonder what makes a 
 musician unique, well recognisable between the others, or what makes a
 musician so similar to another. For example
 this frequently happens with guitarists, when people recognize 
-a "Santana" guitar solo or a "Hendrix" guitar solo just listening 
- few notes and having never heard that particular solo, or when people
-says that Steve Vai sounds similar to Joe Satriani.\footnote{Last.fm, a
+a \emph{Santana} guitar solo or a \emph{Hendrix} guitar solo just listening 
+ to a few notes of it, or when people
+say that \emph{Steve Vai} sounds similar to \emph{Joe
+Satriani}.\footnote{\emph{Last.fm}, a
 collaborative website, assigns a "super" level of similarity between Steve Vai
 and Joe Satriani. This may be related to the fact that Steve Vai was a
 his student.}.
@@ -45,7 +61,7 @@ some notes patterns
 repetition in one musician compositions history or that there are some
 similar notes patterns between different musicians compositions caused
 by their similar musical influence or musical tastes.\\
-Thus with the aim to analyze
+Thus with the aim to analyse
 the relations between notes patterns in guitar
 solos, often called guitar licks, the developing process of the software 
 described in this
@@ -61,47 +77,47 @@ The area of scientific research
 that usually is interested in the empirical examination of real-world network
  is the study of \emph{Complex Networks}. Some of the study approaches
 and mathematical methods that usually interests the Complex Networks
-area, such as graph theory or scale-free network
+area, such as graph theory or small-world network
 comparison\cite{complex-networks}, 
 have been considered and will be discussed in the next sections.\\
 In addition to the network analysis tools, LickNet provides some other
-features focused more on the non-technical use of the application, like
+features like
 the \emph{Lick Classifier} and the \emph{Lick Generator}. These
 functionalities are still in an early stage but can be a starting point
 to realize some practical application focused to end users who may want to
 understand and replicate some other guitarist playing style, or to
-realize some artificial agents that may "play" some music while interacting
+realize some artificial agents that may ``play'' some music while interacting
 with human players.
 
 \section{Related Works}
 Several empirical studies about music have been already treated with a
 network analysis approach. In \cite{music-genres} networks have been
 used to represent the correlations between the musical tastes of
-different listener. In addition the same paper show a technique to
+different listener. In addition, the same paper shows a technique to
 create a network of musical groups and artists which are connected by
 the similarity of their audience; a similar approach has been used in
 other remarkable works \cite{artists-network}\cite{metal-network}.\\ 
-The authors of \cite{sw-words} showed a method to create a network of human language words linking
-them with a correlation parameter such as their relative distance in 
-sentence, assigning the maximum distance for forming link of 2. This
+The authors of \cite{sw-words} introduced a method to create a network of human language words linking
+them through a correlation parameter such as their relative distance in
+a sentence, assigning the maximum distance for forming link to 2. This
 means that two words can be linked together if in a sentence one word is the
 successor or the successor of the successor of the other word. They
 stated that their choice has two reason:
 \begin{enumerate}
 \item Many co-occurrences of
-words take place at distance of one, e.g. 'red flowers' (adjective-noun), 
-'stay here' (verb-adverb), 'getting dark' (verb-adjective), etc. 
+words take place at distance of one, e.g. `red flowers' (adjective-noun), 
+`stay here' (verb-adverb), `getting dark' (verb-adjective), etc. 
 \item Many co-occurrences of words take place at distance of two, e.g.
-'hit the ball' (verb-object),
-'Mary usually cries' (subject-verb), 'Live in Boston' (verb-noun), etc..
+`hit the ball' (verb-object),
+`Mary usually cries' (subject-verb), `Live in Boston' (verb-noun), etc..
 \end{enumerate}
 In the section \ref{sec:networks} it will be pointed out  
-that a similar graph creation procedure as been used in this work but
-with the maximum distance for forming link of 1 as it may result non
+that a similar graph creation procedure as been used in this work, but
+with the maximum distance for forming link of 1. This because it is not
 trivial
 to determine a multi-step correlation value between musical notes in a
 notes lick.
-Anyway a maximum distance $>$ 1 may be tested in future works.
+Anyway a use of the maximum distance greater than 1 may be tested in future works.
 
 \section{LickNet}
 As introduced before, LickNet offers the possibility to study the
@@ -123,7 +139,7 @@ notation for its ease of use \footnote{Guitar tablature removes the
 requirement for the player to remember the associations between the
 notes and the corresponding fretboard positions, as the latter are directly
 represented in the tablature notation.}
-but it is instrument-specific. Also guitar tablature is not standardized and different 
+but it is instrument-specific. Also, guitar tablature is not standardized and different 
 sheet-music publishers adopt different conventions. This means that a
 guitar tablature can be understood only by guitar players and its
 conversion to the standard notation or formal interpretation may result
@@ -136,55 +152,59 @@ Guitar} servers store a large amount of tablature files encoded with its format.
 Another interesting software is \emph{TuxGuitar}, a free and open source
 tablature editor that also supports the ability to import and export
 Guitar Pro files\cite{tuxguitar}. Moreover its source code can be freely
-re-used and adapted to any other application as it has been done with
-LickNet with the purpose of importing the tablature files retrieved
+re-used and adapted to any other application. LickNet, in fact, includes
+the TuxGuitar library with the purpose of importing the tablature files retrieved
 online.\\
 After that the tablature can be interpreted by software, a guitar solo
 is represented as a sequence of notes, where each of them is composed
  of the following fields:
 \begin{itemize}
-	\item String: at which string of the guitar the note is played
-	\item Value: at which fret of the fretboard the note is played
-	\item Effects: a collections of effects such as bending, vibrato,
+	\item \textbf{String}: at which string of the guitar the note is played
+	\item \textbf{Value}: at which fret of the fretboard the note is played
+	\item \textbf{Effects}: a collections of effects such as bending, vibrato,
 		harmonic, etc.
-	\item Duration: the time duration of the note, represented as a fraction value
+	\item \textbf{Duration}: the time duration of the note, represented
+as a fraction value.
 \end{itemize}
 This is how the TuxGuitar library represents the notes, but some
 adaptations and additional 
 informations are needed for the application purpose. It has been decided
 to represent a single note in LickNet as the following:
 \begin{itemize}
-	\item Base Note: the value of the musical note non dependent by the octave. It's
-a value in the range of [0,12] as the possible notes are 11 plus the
-\emph{rest} note. The note 0 is assigned to C.
-	\item Octave: the octave of the note. Note that the note pitch $p$ is given
+	\item \textbf{Base Note}: the value of the musical note. It is
+a value in the range of [0,12] and not dependent by the octave. The 0th
+note is assigned to C, the 11th to B, the last one, and the 12th is the
+rest note..
+	\item \textbf{Octave}: the octave of the note. The note pitch $p$ is given
 by the equation $p = o \times 12 + b $, where $o$ is the octave and $b$
 is the base note.
-	\item Time: it's a floating point value in the range [0,1] indicating the duration of
+	\item \textbf{Time}: it's a floating point value in the range [0,1] indicating the duration of
 the note. The dotted and double dotted notes are also considered, as are
 the triplets. For example a quaver dotted note would have a
 time value of $\frac{1}{8} + \frac{1}{16} = 0.1875$ and a semi-quaver triplet note
-would have the value of $\frac{1}{16} \times \frac{2}{3} \simeq 0.042$.
-	\item Bend Distance: if a note has a bending effect, the bending
+would have the time value of $\frac{1}{16} \times \frac{2}{3} \simeq 0.042$.
+	\item \textbf{Bend Distance}: if a note has a bending effect, the bending
 distance is the offset from the base note to the bended note. For
 example if a F note (base note = 5) is bended to G than the distance is
-2, but if is bended to F\# (half step bending) than the distance is 1. It
+2, but if it is bended to F\# (half step bending) than the distance is 1. It
 is possible that the bending effect is defined with more complex
-properties: it may be defined with bending and release property or with the bending,
-release and bending again property. Thus it has been decided to calculate
+properties: it may be defined with the \emph{bending and release}
+property or with the \emph{bending,
+release and bending again} property. Thus it has been decided to calculate
 the bending distance has the average bending distance.
-	\item Node Key: it is an identifier for a note in the graph. It is
+	\item \textbf{Node Key}: it is an identifier for a note in the graph. It is
 essentially a string where the values of the previous fields, except the
 octave, are
 concatenated. For instance a semi-quaver triplet F note with a bending
-to G would have the resulting node key: "05:0.042:b2". There may be the
+to G would have the resulting node key: ``05:0.042:b2''. There may be the
 case in which the bending should not be considered, then the bending distance offset 
-will be added to the base note and the node key of the same note in the
-previous example would be: "07:0.042".
-
-In the next section will be shown how this data model is used in the
-network creation.
+will be added to the base note. In this case the node key of the note
+used in the
+previous example would be: ``07:0.042''.
 \end{itemize}
+
+In the next section it will be shown how the data model, here introduced, is used in the
+network creation.
 \section{Networks Generator}
 \label{sec:networks}
 %TODO add citations
@@ -288,9 +308,9 @@ works.
 \end{algorithm}
 
 \subsection{Networks Analysis}
-\begin{figure}
+\begin{figure}[H]
 \centering
-\includegraphics[scale=0.32]{hendrix_graph.png}
+\includegraphics[scale=0.43]{hendrix_graph.png}
 \caption{A graph example created with 6 Jimi Hendrix
 solos. Edges of self linked nodes are not shown.}
 \label{fig:hendrixgraph}
@@ -353,11 +373,14 @@ C_{rand}$ and $L \approx L_{rand}$, satisfying the SW property
     \hline
   \end{tabular}
 \end{center}
-  \caption{Small World comparison results.}
+  \caption{Small World comparison results. Each graph is created with
+the tablature files of a particular guitarist except for the Whole Graph
+that is created with all the tablature files used for the other graphs
+generation.}
   \label{tab:sw}
 \end{table}
  
-\section{Lick Classifier}
+\section{Licks Classifier and Generator}
 As introduced before, a possible application for the graphs created with
 the method described in the previous section may be a lick classifier.
 Let us introduce the scenario in which a graph is created with the solos
@@ -375,11 +398,25 @@ lick it simply performs a walk of the lick on every graph collecting the
 corresponding total weights. The total weights are then dived by the
 number of notes used in the corresponding graphs creation.
 
-\section{Licks Generator}
+Another proposed application is the Licks Generator: through the "LickNet" user
+interface, it is possible to select a graph from the graphs list and
+generate a set of licks, which is sorted in a descending ordered by
+the matching score of the licks. Its algorithm is very simple: first it
+performs a very big number of random walks on the selected graph. Each
+of the walk has a resulting total weight with which the generator is
+able to sort them. Only the first $N$, with $N$ as a small number, 
+licks are then considered to be significant for the selected graph.
+
+It will be shown in the next section that even if the two applications
+described here are very simple, they can be effective.
 
 \section{Tests and Results}
 The table \ref{tab:classifier} shows the results of 4 tests
-made with the lick classifier. For each experiment it has been used a
+made with the lick classifier. For convenience let us call
+\emph{library} the set of graphs used the experiments. Every graph of
+the library has been generated from a set of solos of a particular
+guitarist, more precisely Jimi Hendrix, Dave Murray and Angus Young.\\
+For each experiment it has been classified a
 guitar solo (licks set) of a particular guitarist that was not used in
 any of the graph creation (unknown). 
 Each row indicates a different
@@ -402,8 +439,6 @@ for each graph by the corresponding unknown licks set. \setlength{\tabcolsep}{8p
 \label{tab:classifier}
 \end{table}
 
-For convenience let us call
-\emph{library} the set of graphs used in each experiment.
 Moreover the scores are relative to each test and should not be
 interpreted globally, as they are dependent on the notes sequence
 length of the licks.
@@ -431,17 +466,67 @@ of data this cannot be easy verified. A measurement method for finding the
 correlations between the guitarists using the classifier here proposed
 may be modeled in future works.
 
-%TODO: generator tests
 
-\section{Development Complications}
-%TODO tabs are shitty written!!!!!!
+With the same library, the Licks Generator has been tested. For every
+guitarist it has been generated a set of licks that it has been tested
+again with the lick classifier in order to see if the generated licks
+can be significant for the respective guitarists. As expected, each set
+of generated licks gains the best score with its corresponding
+guitarist.\\
+In addition, in the LickNet source code repository\footnote{The
+repository is currently located at
+\url{https://github.com/matteomartelli/licknet}. Also all the software
+parts are free software and the source code is open. The instructions
+for contributing are provided in the README file.}
+ provided with this document,
+there is an example data folder that contains the tablature files used
+to generate the library, the tablature files of the licks used in the
+classifier tests and the tablature files of the licks created with the
+lick generator.
+\begin{table}
+\begin{center}
+  \begin{tabular}{ l c c c }
+    \hline
+    Lick guitarist  & Dave Murray & Jimi Hendrix & Angus Young  \\ \hline
+	Jimi Hendrix & 0.220 & \underline{\textbf{0.323}} & 0.069 \\
+    Dave Murray & \underline{\textbf{0.293}} & 0.208 & 0.052 \\
+	Angus Young & 0.117 & 0.131 & \underline{\textbf{0.449}} \\
+  \end{tabular}
+\end{center}
+\caption{Results of the generated licks tested on the Licks Classifier.}
+\label{tab:classifier}
+\end{table}
 
 \section{Future Development}
-%TODO artists co-relations with licks: get a lick of an artist and check
-%the weights on all the others graph
-
+In this section it will be proposed some enhancement to the software.
+The first one is to find a method to automatically retrieve and
+reorganise the tablature files. The main problem is that those files are
+often badly written and mostly without the key signature indication. As
+an automatic method such this one can be hard to develop, another solution
+may be to provide a public database of tablature files already
+reorganised for LickNet by their users.
+As already introduced before, a second enhancement can be a feature for
+co-relating the artists within their licks: it may works with the
+classifier that from a set of licks of an artist can relate the latter
+to the other artists in the library by the score gained for each
+corresponding graph.\\
+Moreover this software may be attached to other projects: for example it may be used 
+in an improvisation software to generate runtime the notes of the
+soloist musician, or it may be attached to some tablature editor to easy
+generate some licks as start points for user compositions.
 
 \section{Conclusions}
+In the interests of the complex network analysis, it has been seen that
+the networks of licks seem to be organised with the properties of small
+world networks. Furthermore, these networks look like to have a
+structure that highly depends from the input data used in their
+creation and from their corresponding guitarists. Therefore, functions
+that operates on the guitarists signature playing style, such as the
+licks classifier and the licks generator, stand to reason.
+
+The initial expectations are well satisfied and LickNet appear to be a
+good start point for developing a various amount of software related to
+music classification and composition.
 
 \begin{thebibliography}{50}
 	\bibitem{complex-networks} 
