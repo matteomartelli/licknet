@@ -208,8 +208,8 @@ network creation.
 \section{Networks Generator}
 \label{sec:networks}
 %TODO add citations
-The network is modeled as a directed multigraph and it's created
-scanning the input music sheets files. Let $G$ be a directed
+The network is modeled as a directed multigraph\cite{graph-theory} and it is generated
+by scanning the music sheets files given in input. Let $G$ be a directed
 multigraph defined as an ordered 4-tuple $(N,E,s,t)$ with
 \begin{itemize}
 	\item $N$ a set of nodes,
@@ -220,8 +220,9 @@ multigraph defined as an ordered 4-tuple $(N,E,s,t)$ with
 Moreover a node $n \in N$ contains a musical note identified by its Node Key.
 An edge $e \in E$ from a node $s$ to a node $t$ exists if the musical note
 contained in the node $t$ was a successor, in the input music sheet, of the musical note 
-contained in the node $s$. Also, there may exists more than one edge from a node $s$ and $t$
-as a same musical note can be reached by another note many times with
+contained in the node $s$. Also, there may exist more than one edge from
+a node $s$ and $t$,
+insofar as a same musical note can be reached by another note many times with
 different octaves jumps. Thus an edge from $s$ to $t$ indicates with which
 octave jump the note contained in $s$ can reach $t$ in a graph walk step.
 An example of a multigraph with its corresponding sheet music is shown
@@ -249,22 +250,22 @@ process that determines if a lick is significant for a certain graph will
 be covered in the next section.\\
 A simplification of the model has been introduced in the development
 process: the directed multigraph is represented as a directed graph,
-where an edge is an object that contains an array which each element $i$
+where an edge is an object that contains an array which each $i_{th}$ element
 indicates the pass-through frequency number for the octave corresponding
-to $i$. More specifically if $f(j)$ is the frequency number related to the
-octave jump $j$, then 
-\[ v(i) = f(i + n), \]
-where $n$ is the maximum octave increment or decrement possible.
+to $i$. More specifically if $f(x)$ is the frequency number related to
+an octave jump $x$, then the $i_{th}$ element of the array would be:
+\[ v(i) = f(i + N_o), \]
+where $N_o$ is the maximum octave increment or decrement possible.
 All the octaves on a standard tuned guitar are 5, thus with 6 octaves even
 the 7-strings guitars and most of the non-standard tuned guitars can be
-covered. Therefore the size of the array is 12 as a node $s$ can reach
+covered. Therefore the size of the array is 12 because a node $s$ can reach
 in a single step a node $t$ with an increment or decrement of most 6
-octaves. To clarify, for example if the node $s$ has reached with a
+octaves. To clarify, if the node $s$ has reached with a
 single step the node
 $t$ 5 times without any octave jump, 3 times with an octave jump of +1, 
 1 time with an octave jump of +2
 and 2 times with an octave jump of -1, the resulting octave jumps array
-for the edge $e$ that connects $a$ and be would be:
+for the edge $e$ that connects $s$ and $t$ would be:
 \[ v = (0,0,0,0,0,2,5,3,1,0,0,0,0) \]
  A directed edge $e$ from $s$ to $t$ exists if at least one
 element of the array is non-zero.
@@ -324,13 +325,10 @@ happen also with other graphs and the difference is higher with those
 guitarists that heavily use bendings. This suggests that 
 considering more 
 guitar effects, such as vibratos or virtual harmonics, 
-the vertex cardinality tends to increase. In the next
-sections it will be shown that considering more guitar effects may be 
-also interesting for the
-licks classifier and the licks generator.
+the vertex cardinality tends to increase.
 
-Many research articles on real network graphs, like biological, 
-social and technological graphs showed that they share a common
+Many research articles about real network graphs, like biological, 
+social and technological graphs, showed that they share a common
 feature: the so-called small-world (SW) property \cite{sw-watts}.
 In SW networks most nodes can be reached from every other by a small
 numbers of steps and furthermore they are characterized by a high
@@ -341,7 +339,7 @@ the network is converted to a non-directed graph as a model
 simplification. Let us start defining 
 the clustering coefficient: given $e_{ij}$ an edge from the vertex $v_i$
 to the vertex $v_j$, the number of cycles of length 3 (closed triplets) from/to a node $i$ is:
-\[ p_{ii}^{(3)} = \sum_{jk}[Maw{e_{ij}e_{jk}e_{ki}}\;, \]
+\[ p_{ii}^{(3)} = \sum_{jk}{e_{ij}e_{jk}e_{ki}}\;, \]
 thus the local clustering coefficient of a node $i$ is 
 \[ C_i = \frac{p_{ii}^{(3)}}{k_i(k_i-1)/2} \; ,\]
 and the average clustering coefficient of a graph is
@@ -352,9 +350,11 @@ Moreover the shortest path length average $L$, is defined as:
 where $d_{ij}$ is the shortest path length from a node $i$ to a node
 $j$.
 Then the table \ref{tab:sw} shows the $C$ and $L$ values of some graphs created with the algorithm
-\ref{algo:gcreation} and converted to non-directed graphs, the $C_{rand}$
-and $L_{rand}$ values that indicates $C$ and $L$ of the equivalent
-derived random networks and the small-coefficient $\sigma$ defined as:
+\ref{algo:gcreation} and converted to non-directed graphs. In addition
+also the $C_{rand}$
+and $L_{rand}$ values are represented. $C_{rand}$ and $L_{rand}$ values
+indicate the clustering coefficient and average path length of the equivalent
+derived random networks. The last column in the table refers to the small-coefficient $\sigma$ defined as:
 \[ \sigma = \frac{C / C_{rand}}{L / L_{rand}} \]
 
 What is remarkable is that the $\sigma$ values are $> 1$, also $C \gg
@@ -413,7 +413,7 @@ described here are very simple, they can be effective.
 \section{Tests and Results}
 The table \ref{tab:classifier} shows the results of 4 tests
 made with the lick classifier. For convenience let us call
-\emph{library} the set of graphs used the experiments. Every graph of
+\emph{library} the set of graphs used in the experiments. Every graph of
 the library has been generated from a set of solos of a particular
 guitarist, more precisely Jimi Hendrix, Dave Murray and Angus Young.\\
 For each experiment it has been classified a
@@ -442,6 +442,7 @@ for each graph by the corresponding unknown licks set. \setlength{\tabcolsep}{8p
 Moreover the scores are relative to each test and should not be
 interpreted globally, as they are dependent on the notes sequence
 length of the licks.
+%FIXME: this part is badly written!!
 It is interesting how well the classifier recognizes that an unknown
 licks set of a guitarist in the library belongs to its guitarist. What
 is also remarkable is that the matching expectation of the experiments are 
@@ -455,8 +456,9 @@ Kirk Hammett, the lead guitarist of Metallica, matches more the Jimi
 Hendrix graph than the others. But the thing to notice is that the score
 matching with Dave Murray is also close while the score with Angus Young
 is far. This may be caused by the fact that Hammett was influenced by
-Jimi Hendrix \cite{hammet-hendrix} in his early years and that the genre played by Metallica
-is closer to the genre played by Iron Maiden. Anyway these are all
+Jimi Hendrix  in his early years \cite{hammet-hendrix} and that the genre played by Metallica
+is closer to the genre played by Iron Maiden than the genre played by
+AC/DC. Anyway these are all
 suppositions, for a better interpretation it can be helpful considering the
 graph of Kirk Hammett also, in order to determine the gap between those
 scores and the score gained with Kirk Hammett himself. For example by the
@@ -472,7 +474,7 @@ guitarist it has been generated a set of licks that it has been tested
 again with the lick classifier in order to see if the generated licks
 can be significant for the respective guitarists. As expected, each set
 of generated licks gains the best score with its corresponding
-guitarist.\\
+guitarist (Table \ref{tab:generator}).\\
 In addition, in the LickNet source code repository\footnote{The
 repository is currently located at
 \url{https://github.com/matteomartelli/licknet}. Also all the software
@@ -494,7 +496,7 @@ lick generator.
   \end{tabular}
 \end{center}
 \caption{Results of the generated licks tested on the Licks Classifier.}
-\label{tab:classifier}
+\label{tab:generator}
 \end{table}
 
 \section{Future Development}
@@ -509,7 +511,8 @@ As already introduced before, a second enhancement can be a feature for
 co-relating the artists within their licks: it may works with the
 classifier that from a set of licks of an artist can relate the latter
 to the other artists in the library by the score gained for each
-corresponding graph.\\
+corresponding graph.
+
 Moreover this software may be attached to other projects: for example it may be used 
 in an improvisation software to generate runtime the notes of the
 soloist musician, or it may be attached to some tablature editor to easy
@@ -557,6 +560,10 @@ music classification and composition.
 		TuxGuitar: Editorial review,
 		\textsl{Software Informer},
 		2014.
+	\bibitem{graph-theory}
+		Balakrishnan, V. K.,
+		\textsl{Graph Theory},
+		1997.
 	\bibitem{sw-watts}
 		Watts, D. J. and Strogatz, S. H.,
 		Collective dynamics of `small-world’ networks,
