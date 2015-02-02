@@ -1,5 +1,5 @@
 APPNAME = licknet
-DIR = `cd $$(dirname "${BASH_SOURCE[0]}") && pwd`
+DIR = "."#`cd $$(dirname "${BASH_SOURCE[0]}") && pwd`
 LIBDIR = lib
 LIBGS = gs-core-1.2.jar
 LIBGSALGO = gs-algo-1.2.jar

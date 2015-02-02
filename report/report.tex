@@ -58,19 +58,23 @@ Satriani}.\footnote{\emph{Last.fm}, a
 collaborative website, assigns a "super" level of similarity between Steve Vai
 and Joe Satriani. This may very well be due to the fact that Steve Vai was his student.}.
 One may also think that this is due to the fact that there are repetitions among some note patterns
-in a musician's repertoire or that similar note patterns emerge from their common musical influence or musical tastes.\\
+in a musician's repertoire or that similar note patterns emerge from their common musical influence or musical tastes.
+
 Thus the idea for \emph{LickNet} emerged from my effort to analyse the relations (modeled as networks) between note patterns in guitar
 solos (licks) as described in this document. The choice to focus on guitar solos has been made 
 because of the large amount of data available online but my work may easily
 be extended to other similar kinds of data. For example drum patterns, whole compositions, improvisations or even jam sessions may be considered. 
+
 It has been chosen to model
 the data elements and their relations within a network as the
-analytical methods in graph theory are very useful.\\
-The area of scientific research
+analytical methods in graph theory are very useful. The area of scientific research
 that is usually interested in the empirical examination of real-world networks
  is the study of \emph{Complex Networks}. Different approaches
 and mathematical methods pertaining to the Complex Networks
-field of study have been considered and will be discussed in the next sections; including graph theory and small-world network comparison\cite{complex-networks}\\
+field of study have been considered and will be discussed in the next sections; 
+including graph theory and small-world network
+comparison\cite{complex-networks}.
+
 As said before, in addition to the network analysis tools, LickNet provides other
 features like
 the \emph{Lick Classifier} and the \emph{Lick Generator}. These
@@ -85,7 +89,7 @@ used to model the correlation among musical tastes of
 different listener. In addition, the same paper shows a technique to
 create a network of musical groups and artists which are connected by
 the similarity of their audience. A similar approach has been used in
-other remarkable works \cite{artists-network}\cite{metal-network}.\\ 
+other remarkable works \cite{artists-network}\cite{metal-network}.
 The authors of \cite{sw-words} introduced a method to create a network of human language words, linking
 them through a correlation parameter such as their relative distance in
 a sentence, choosing a value of 2 as the maximum distance for forming links. This
@@ -101,7 +105,7 @@ words take place at a distance of one, e.g. `red flowers' (adjective-noun),
 `Mary usually cries' (subject-verb), `Live in Boston' (verb-noun), etc..
 \end{enumerate}
 In the  section \ref{sec:networks} it will be pointed out  
-that a similar graph creation procedure as been used in this work, but
+that a similar graph creation procedure has been used in this work, but
 with the maximum distance for forming links of 1. This because it is not
 trivial
 to determine a multi-step correlation value between musical notes in a
@@ -123,21 +127,16 @@ As many guitarists may already know, there are plenty of websites that
 store guitar sheets and tablatures. One of them is \url{www.ultimate-guitar.com}
 that counts more than 800000 sheets, which are mostly written
 in the guitar tablature notation. Guitar players usually choose this
-notation for its ease of use \footnote{Guitar tablature removes the
+notation for its ease of use\footnote{Guitar tablature removes the
 requirement for the player to remember the association between each
 note and the corresponding finger position on the fretboard since they are directly
 represented in numbers (which fret) for each string.}
 but all this is instrument-specific. Also, guitar tablature is not standardized and
 different publishers adopt different conventions. 
-
-
 This means that a
 guitar tablature can be understood only by guitar players and its
 conversion to the standard notation or formal interpretation may result
 wearing. 
-
-
-
 For example the semantic of a guitar tablature changes even if
 a guitar is not standard tuned.\\
 Fortunately there are various computer programs available for writing
@@ -230,7 +229,8 @@ node.}
 \end{figure}
 The octave informations are not included in the graph nodes because 
 similar licks can be played at different octaves and otherwise it would be
-harder to underline the relations between them.\\
+harder to underline the relations between them.
+
 It has been decided to add a weight to each edge that corresponds to how many
 times an edge is passed through. This means that many walks
 from a node $a$ to a node $b$ with the same distance $d$ but different
@@ -246,7 +246,7 @@ where an edge is an object that contains an array which each $i_{th}$ element
 indicates the pass-through frequency number for the octave corresponding
 to $i$. More specifically if $f(x)$ is the frequency number related to
 an octave jump $x$, then the $i_{th}$ element of the array would be:
-\[ v(i) = f(i + N_o), \]
+\[ v(i) = f(i - N_o), \]
 where $N_o$ is the maximum octave increment or decrement possible.
 There are 5 octaves on a standard tuned guitar, thus with 6 octaves even
 the 7-strings guitars and most of the non-standard tuned guitars can be
@@ -386,7 +386,8 @@ lick it simply performs a walk of the lick on every graph collecting the
 corresponding total weights. The total weights are then dived by the
 number of notes used in the corresponding graphs creation.
 
-Another proposed application is the Licks Generator: through the "LickNet" user
+Another proposed application is the Licks Generator: through the
+\emph{LickNet} user
 interface, it is possible to select a graph from the graphs list and
 generate a set of licks which is sorted in a descending order by
 the matching lick score. Its algorithm is very simple: first it
@@ -440,7 +441,8 @@ is a closer match to Jimi Hendrix than the others. But it is also close to
 Dave Murray while it is farther away from Angus Young. This may be caused by the fact that Hammett was influenced by
 Jimi Hendrix in his early years \cite{hammet-hendrix} and that the genre played by Metallica
 is closer to the genre played by Iron Maiden than the genre played by
-AC/DC. In the end this is all speculation, a better interpretation would be desirable, also taking into consideration 
+AC/DC\footnote{In \cite{artists-network}, Metallica and Iron Maiden have
+the same grey color(metal), while AC/DC is red colored(rock).}. In the end this is all speculation, a better interpretation would be desirable, also taking into consideration 
 Kirk Hammett's graph, in order to determine the gap between those
 scores and the score achieved by Kirk Hammett himself. For example by the
 first two experiments one may interpret that Jimi Hendrix has a closer
@@ -451,7 +453,7 @@ using my lick classifier may be modeled in future works.
 
 The Licks Generator has been tested with the same library. For every
 guitarist a set of licks has been generated and tested again with the lick 
-classifier in order to check wether the generated licks
+classifier in order to check whether the generated licks
 can be traced back to the respective guitarists. As expected, each set
 of generated licks gains the best score in correspondence to the right
 guitarist (Table \ref{tab:generator}).\\

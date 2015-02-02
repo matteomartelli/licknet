@@ -24,8 +24,11 @@ Now copy lib/tuxguitar-lib.jar, share/plugins/tuxguitar-gtp.jar and share/plugin
 
 ##Build
 Make sure of the libraries are placed in the *lib* directory.
-Then under linux, run *make* and launch *licknet.sh*.
+Then under linux, run *make*.
 With other OSs you should find how to build with *ant* that is what actually the Makefile does.
+
+##Run
+(Unix) Launch the executable *licknet.sh* from the project main folder.
 
 ##Contribute
 If you want to contribute 
